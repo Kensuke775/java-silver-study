@@ -9,5 +9,7 @@ Oracle Certified Java Programmer, Silver SE 17（1Z0-825）の学習記録です
 - [chapter1.md](chapter1.md)：Javaの基本（クラス、パッケージ、コンパイルと実行など）
 - [chapter2.md](chapter2.md)：数値リテラル、テキストブロック、配列、String操作など
 - [chapter3.md](chapter3.md)：演算子、キャスト、オートボクシング、if/switchによる条件分岐
+- [chapter4.md](chapter4.md)：繰り返し文（for/while）、到達不能コード、スコープ、break/continue、多次元配列
+- [chapter5.md](chapter5.md)：プリミティブ型と参照型、Integerキャッシュ、可変長引数、オーバーロード解決、パッケージ
 
 学習は継続中で、章が進み次第このリポジトリも更新していきます。
