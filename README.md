@@ -11,5 +11,6 @@ Oracle Certified Java Programmer, Silver SE 17（1Z0-825）の学習記録です
 - [chapter3.md](chapter3.md)：演算子、キャスト、オートボクシング、if/switchによる条件分岐
 - [chapter4.md](chapter4.md)：繰り返し文（for/while）、到達不能コード、スコープ、break/continue、多次元配列
 - [chapter5.md](chapter5.md)：プリミティブ型と参照型、Integerキャッシュ、可変長引数、オーバーロード解決（あいまいさ・型優先順位）、パッケージ、コンストラクタ（this()チェーン・オーバーロード）、static/インスタンスメンバ、初期化子、float/doubleの出力仕様、mainのオーバーロード、章末問題の間違いパターン
+- [chapter6.md](chapter6.md)：単一継承とインタフェースの多重実装、@Overrideの実体、static/インスタンスのオーバーライド、フィールド隠蔽とメソッドの動的束縛、コンストラクタチェーン、super()/this()の対比、パッケージをまたいだprotectedアクセス、レコードクラス（record）
 
 学習は継続中で、章が進み次第このリポジトリも更新していきます。
