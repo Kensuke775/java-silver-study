@@ -442,3 +442,272 @@ class Clothes extends Item {
 `main`は特別な構文ではなく「`public static void main(String[] args)`というシグネチャを持つ、ただのstaticメソッド」。JVMは`java クラス名`で指定されたクラスにこのシグネチャがあるかを探すだけなので、継承関係とは無関係にどのクラスにも書ける。
 
 ただし`java Main`と`java Clothes`は別々の起動コマンドであり、**同時に並行実行されるわけではない**（別々の独立したプロセス）。複数のクラスに`main`を分散させる本当のリスクは並行実行ではなく、**「このプログラムはどこから始まるのか」が読み手にとって曖昧になる**こと。起動口を1つに絞ることで「そこから上から下へ一方向にデータが流れる」設計になり、コードを追いやすくなる（**単一エントリーポイント**の原則）。
+
+---
+
+## 18. 抽象クラス・抽象メソッドの目的（chap6/12実演）
+
+```java
+abstract class Transport {
+    private int speed;
+    public Transport(int speed) { this.speed = speed; }
+    public int getSpeed() { return speed; }
+    public abstract void move();
+}
+class Airplane extends Transport {
+    public Airplane(int speed) { super(speed); }
+    @Override public void move() { System.out.println("Airplane: flying at " + getSpeed() + "km/h"); }
+}
+```
+
+`abstract`は「共通の型として扱いたいが、単体では存在させたくない・存在させる意味がない概念」を表現する仕組み。
+
+- **`abstract class`**：`new Transport(300)`のように単体でインスタンス化できなくする。「乗り物」という概念自体は実在せず、実在するのは常に「飛行機」「船」のような具体的な乗り物だけ、という設計を強制する
+- **`abstract void move();`**：本体が書けない（サブクラスごとに移動方法が全く違うため）。サブクラス側に実装を強制し、実装し忘れをコンパイルエラーで検出できる（`Airplane is not abstract and does not override abstract method move()`）
+
+`abstract class Car extends Transport`のように、`move()`を実装しないまま更に別の抽象クラスを挟むことも可能（`Car`自身もabstractのままになる）。
+
+ポリモーフィズムとの繋がり：`Transport t = new Airplane(900); t.move();`のように、`Transport`型であれば中身が何であろうと`move()`が必ず呼べることをコンパイラが保証してくれる。
+
+---
+
+## 19. インタフェースの定数・メソッドの暗黙修飾子（chap6/13実演、javapで実証）
+
+```java
+public interface Test {
+    int EXCELLENT = 100;
+    public int VERY_GOOD = 90;
+    static int GOOD = 80;
+    final int AVERAGE = 70;
+//  private int BELOW_AVERAGE = 60;     // privateは指定できない
+//  public static final int VERY_POOR;  // 定数の初期化は必須
+    void foo();
+    public int bar();
+    abstract boolean baz();
+//  protected double qux();             // protectedは指定できない
+//  final String quux();                // finalは指定できない
+}
+```
+
+- フィールド：書いても書かなくても常に`public static final`。`private`は指定不可、初期化は必須
+- 本体の無いメソッド：常に`public abstract`。`protected`・`final`は指定不可
+- ただし`default`/`static`メソッド（本体を持つ）は`abstract`にはならず`public`のみ付与される。`private`メソッドだけは逆に`public`が付かない例外
+
+`javap`で実際に確認すると：
+```
+public interface Test {
+  public static final int EXCELLENT;
+  ...
+  public abstract void foo();
+  ...
+}
+```
+`javap -v`（verbose）を使うと、`ConstantValue: int 100`のように**定数の実際の値まで**確認できる（デフォルトの`javap`はシグネチャのみで値は表示しない）。
+
+### `javap`とは
+JDK標準の**クラスファイル逆アセンブラ**。ソース(`.java`)が無くても、コンパイル済み`.class`の構造（フィールド・メソッド・コンストラクタ）を確認できる。
+```bash
+javap クラス名          # シグネチャのみ
+javap -v クラス名        # 値・定数プールまで含めて詳細表示
+javap -p クラス名        # privateメンバーも表示
+javap -c クラス名        # バイトコードレベルで表示
+```
+
+### `Test.EXCELLENT`という書き方との違い（要注意）
+```java
+System.out.println(Test.EXCELLENT);  // ← .javaファイルの中で書く構文（インタフェース名.定数名でアクセス）
+```
+これは**Javaのソースコード内の構文**であり、ターミナルコマンドの`javap`とは無関係。`javap Test.EXCELLENT`のようにコマンドの引数として渡すことはできない（`javap`はクラス名だけを受け取る）。
+
+---
+
+## 20. 同一パッケージなら`public`が無くても普通に使える（chap6/13実演）
+
+```java
+// Run.java
+interface Test { int EXCELLENT = 100; }   // publicなし＝デフォルトアクセス
+public class Run { public static void main(String[] a) { System.out.println(Test.EXCELLENT); } }
+
+// Main.java（別ファイル）
+class Sample implements Test { ... }       // Testをそのまま使えている
+public class Main { ... }
+```
+`Run.java`と`Main.java`はどちらも`package`宣言が無い＝**同じデフォルトパッケージ**に属する。デフォルトアクセスは同一パッケージ内なら誰でも使えるので、別ファイルでも`import`なしで普通に`implements`・参照できる。「1ファイルにつきpublicなトップレベル型は1つまで」というファイル単位の制約と、「デフォルトアクセスは同一パッケージ内ならOK」というアクセス修飾子の制約は別ルール。
+
+同様に、chap6/19の`Cube extends Square`では、`Square`のデフォルトアクセスフィールド`side`が、同じ`com.a`パッケージにいる`Cube`から何も書かなくてもそのまま継承・使用できていた（`private`以外なら継承先で意識不要）。
+
+---
+
+## 21. `toString()`/`getClass()`はrecord専用ではなく全クラス共通（chap6/19実演）
+
+```java
+public abstract sealed class Shape permits Circle, Triangle, Square {
+    public abstract double calcArea();
+    @Override
+    public String toString() {
+        return getClass().getName() + ": " + calcArea() + " sq cm";
+    }
+}
+```
+`toString()`は`java.lang.Object`が持つメソッドで、**全クラスが標準で継承している**（recordはこれを自動でオーバーライドしてくれるだけで、`toString()`自体はrecord専用機能ではない）。通常のクラスでも自分で明示的にオーバーライドすれば同様にカスタマイズできる。
+
+`getClass().getName()`は2段階のメソッドチェーン：
+- `getClass()` → `Object`が持つメソッド。呼ぶと**実行時の実際のクラス**を表す`Class`オブジェクトが返る
+- `.getName()` → その`Class`オブジェクト自身が持つメソッド（`java.lang.Class`のメソッド）。完全修飾名を文字列で返す
+
+`System.out.println(new Circle())` → `println`が`toString()`を自動で呼ぶ → `Shape`の`toString()`が実行される → その中で`calcArea()`（`Circle`の実装）と`getClass().getName()`（`com.a.Circle`）が呼ばれる、という多段階の連鎖で最終的な出力が組み立てられる。
+
+---
+
+## 22. defaultメソッドの衝突解決：`インタフェース名.super.メソッド名()`（chap6/16実演）
+
+```java
+interface A { default void x() { System.out.println("A"); } }
+interface B extends A { default void x() { System.out.println("B"); } }
+interface C extends A { default void x() { System.out.println("C"); } }
+public class Test2 implements B, C {
+    @Override
+    public void x() { B.super.x(); }   // Bの実装を明示的に使う
+}
+```
+`Test2`は`B`と`C`の両方から`x()`を継承しているが、両方とも独自の`default`実装を持つため**衝突**する（Eclipse等のエラー: "Duplicate default methods named x... are inherited from the types C and B"）。継承チェーンが複数あるインタフェースでは、単純な`super.x()`ではどちらを指すか曖昧なので、**`インタフェース名.super.メソッド名()`という専用構文で名指しする**必要がある。
+
+### 制約：直接implements/extendsしている相手にしか使えない
+```java
+public class Test2 implements B, C {
+    public void x() { A.super.x(); }   // ✗ コンパイルエラー：Aは内部クラスを囲みません
+}
+```
+`Test2`が直接`implements`しているのは`B`と`C`のみ。`A`は`B`/`C`のさらに親（間接的な祖先）であり、`Test2`から見て直接の相手ではないため、`A.super`という書き方自体が構文的に許されない。祖先の実装をそのまま使いたいだけで衝突していない場合（例：`Test2 implements B`だけで`B`自身が`x()`を持たない場合）は、何もオーバーライドせず放置すれば自動的に`A`の実装が届く。
+
+独自の処理で解決したい場合は、委譲せず新しく書けばよい：
+```java
+public void x() { System.out.println("D"); }   // BともCとも無関係な独自実装
+```
+
+---
+
+## 23. staticメソッドはインタフェースで継承・オーバーライドされない（chap6/17実演）
+
+```java
+interface Foo {
+    static void statMethod() { System.out.println("Foo#statMethod()"); }
+}
+interface Bar extends Foo {
+    default void x() { Foo.statMethod(); }   // 呼べるのは宣言元の名前経由だけ
+}
+class Concrete implements Bar {
+//  Bar.statMethod();    // ✗ サブインタフェース名経由でも呼べない
+}
+// c.statMethod();       // ✗ インスタンス参照経由でも呼べない
+```
+`static`メソッドは、インタフェースであろうとクラスであろうと**オーバーライドという概念が存在しない**（`@Override`を付けようとするとエラー：「staticメソッドは@Overrideで注釈付けすることはできません」）。
+
+| | `default`メソッド | `static`メソッド |
+|---|---|---|
+| 継承されるか | される（`obj.x()`で呼べる） | **されない** |
+| オーバーライドできるか | できる | **できない** |
+| 呼び出し方 | インスタンス経由 | **宣言したインタフェース名経由のみ**（`Foo.statMethod()`） |
+
+サブインタフェースに同名の`static`メソッドを（`@Override`なしで）定義すると、それは「上書き」ではなく**完全に無関係な、そのインタフェース独自の別メソッド**として共存する（`Foo.statMethod()`と`Bar.statMethod()`はそれぞれ別物として両方呼べる）。
+
+---
+
+## 24. `equals`/`hashCode`/`toString`はインタフェースのdefaultメソッドにできない（chap6/16実演）
+
+```java
+interface Test3 {
+    public default boolean equals(Object obj) { return false; }  // コンパイルエラー
+}
+```
+```
+エラー: インタフェースTest3のデフォルト・メソッドequalsはjava.lang.Objectのメンバーをオーバーライドします
+```
+`equals`/`hashCode`/`toString`は、**すべてのクラスが必ず`Object`から具象実装を継承している**メソッド。`default`メソッドの優先順位ルールは「クラス（親クラス含む）が持つメソッドは常にインタフェースの`default`より優先される」なので、インタフェース側に`default`版を用意しても実装クラス側は常に`Object`由来の実装を優先してしまい、**絶対に呼ばれることがない**。無意味で紛らわしいコードになるため、コンパイル時に禁止されている。
+
+---
+
+## 25. インタフェースを実装するメソッドは`public`が必須（chap6/16実演）
+
+```java
+interface Foo { default void x() {} }
+class Test implements Foo {
+    void x() { ... }   // ✗ エラー：(public)より弱いアクセス権限を割り当てようとしました
+}
+```
+Javaの一般ルールとして、**オーバーライドする側は元のメソッドよりアクセス範囲を狭くできない**。インタフェースのメソッド（`abstract`でも`default`でも）は必ず`public`なので、実装側も`public`以上でなければならない。「今回たまたま他ファイルから呼ばれるから」ではなく、「`Foo`型として扱われた場合に、誰から見ても必ず呼べることを保証する契約だから」という理解が正確。
+
+---
+
+## 26. インタフェース自体・defaultメソッドに`final`を付けられない（chap6/21実演）
+
+```java
+final interface Simple {}   // ✗ 修飾子interfaceとfinalの組合せは不正です
+interface Foo {
+    final default void bar() {}   // ✗ これもエラー（修飾子finalをここで使用することはできません）
+}
+```
+本体の無いメソッドに`final`が付けられない理由は「`abstract`（実装必須）と`final`（オーバーライド禁止）が矛盾するから」で説明できるが、**`default`メソッド（本体があり`abstract`ではない）に`final`を付けてもエラーになる**ため、それだけでは説明しきれない。実際には**インタフェースのメソッドには、本体の有無にかかわらずそもそも`final`という修飾子自体が使えない**という、より広い言語仕様上の制約。固定値を表現したいなら、フィールド（`public static final`の定数）を使うしかない。
+
+---
+
+## 27. ソースルートとパッケージの対応関係（chap6/19, 21, 23実演）
+
+Javaの言語仕様には「このフォルダがルートです」という自動判定機能はない。ルートは常に**明示的に指定するか、javacを実行する場所（カレントディレクトリ）そのものが暗黙のルートになる**。
+
+```
+sources/
+  com/
+    Main.java       ← package com;      （ルートから1階層下）
+    a/
+      Circle.java   ← package com.a;    （ルートから2階層下）
+```
+**パッケージ名のドットの数＝ファイルからルートまで遡る階層数**、という対応関係で機械的に判定できる。ファイルの`package`宣言は、そのファイルの物理的な置き場所と必ず一致していなければならない（一致していないと、javac/IDEの言語サーバーいずれからも「宣言された空のパッケージは、パッケージXであるべき」という趣旨のエラーになる）。
+
+### 「同じパッケージ」は階層の深さではなく完全一致が条件
+```
+com/a/Circle.java  → package com.a;
+com/b/Heart.java   → package com.b;
+```
+どちらも「ルートから2階層下」という同じ深さだが、フォルダ自体が違う（`a`と`b`）ので**別パッケージ**。「階層が同じ」は同じパッケージの条件にならない。「ルートから見て完全に同一のフォルダパスに属している」ことだけが条件。
+
+### コンパイル・実行コマンドのオプション整理
+```bash
+javac -d classes sources/com/Main.java              # -d：.classの出力先
+javac -d classes -sourcepath sources sources/com/Main.java   # -sourcepath：importの解決に使うソースの探索起点
+javac -cp classes sources/com/Main.java             # -cp（コンパイル時）：既にコンパイル済みの.classを参照先として追加
+java -cp classes com.Main                            # -cp（実行時）：常に「.classの置き場所」を指す。.javaを指すことは無い
+```
+`javac`には「importで参照している別クラスが`.class`として見つからなければ、ソースパス上の`.java`を自動で探してコンパイルする」機能があるため、`-cp`で明示的に事前コンパイルを参照する方法（教科書の①②の2段階方式）と、単に`javac Main.java`だけで依存も自動解決させる方法の、どちらでも同じ結果になる。前者はソースと成果物の分離（`-d`で`classes/`にまとめる）に向いた書き方、後者は単純だが`.class`が`.java`と同じ場所に混在する。
+
+`-cp`は**別の演習フォルダの成果物を再利用する**こともできる（例：`chap6/23`のコードが`chap6/19/classes`をそのまま参照）。複数の場所を指定したい場合は`:`（Windowsは`;`）でつなげる（`-cp 19/classes:23`）。
+
+### `java`コマンドの引数は「クラス名は1つだけ」
+```bash
+java -cp 19/classes 23 Main   # ✗ "23"がクラス名として解釈され失敗。"Main"は無視される(args扱い)
+java -cp 19/classes:23 Main   # ○ 複数の場所は-cpの中でコロン連結し、末尾は常にクラス名1つ
+```
+
+---
+
+## 28. シールクラスの`permits`：別パッケージ不可、同一ファイルなら省略可能（chap6/19, 20実演）
+
+```java
+package com.a;
+import com.b.Heart;
+public abstract sealed class Shape permits Circle, Triangle, Square, Heart {}  // Heartはcom.bパッケージ
+```
+```
+エラー: 名前のないモジュールのクラスShapeは別のパッケージのシール・クラスを拡張できません
+（Permitted type Heart in an unnamed module should be declared in the same package com.a of declaring type Shape）
+```
+**`permits`リストに書けるサブタイプは、シールクラス自身と同じパッケージにいなければならない**（名前のないモジュールの場合）。これは`Heart.java`を実際にコンパイルするかどうかとは無関係で、`Shape.java`単体をコンパイルしただけでエラーになる（`Shape`の宣言自体がルール違反のため）。同じ一覧性を保つための制約。
+
+### 同一ファイル内なら`permits`を省略できる
+```java
+public sealed class Shape /* permits Circle, Triangle, Square */ {}
+final class Circle extends Shape {}
+non-sealed class Triangle extends Shape {}
+sealed class Square extends Shape {}
+```
+`permits`をコメントアウトしても、サブクラスが**全部同じファイル内**に揃っていればコンパイルが通る。`javap -v`で確認すると、`PermittedSubclasses: Circle, Triangle, Square`という属性がちゃんと自動生成されている——コンパイラが同一ファイル内の`extends Shape`を検出して暗黙的に許可リストを組み立てている。別ファイル（別パッケージ）に分かれている場合だけ、明示的な`permits`が必須になる。
