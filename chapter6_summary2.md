@@ -124,3 +124,52 @@ public class Main {
 | メソッド解決 | `b.getX()`と`m.getX()`は宣言型が違っても、実体が同じ`Leaf`なら**同じ結果**（動的束縛はメソッドにしか効かない） |
 
 → `Leaf.getX()` = `this.x(30) + super.getX()(Middle.getX()が返す20)` = **50**。宣言型がBaseかMiddleかは無関係で、実体がLeafである限り同じ50になる。
+
+## 応用問題6-3：protectedの「別パッケージ＋サブクラス」アクセスは参照の型で決まる
+
+```java
+// p1/Animal.java
+package p1;
+public class Animal {
+    protected String sound = "Some sound";
+}
+// p1/Cat.java
+package p1;
+public class Cat extends Animal {}
+
+// p2/DogA.java（成功）
+package p2;
+public class DogA extends Animal {
+    void bark() { System.out.println(this.sound); }
+}
+// p2/DogB.java（成功）
+package p2;
+public class DogB extends Animal {
+    void bark(DogB other) { System.out.println(other.sound); }
+}
+// p2/DogC.java（失敗）
+package p2;
+public class DogC extends Animal {
+    void bark(Animal other) { System.out.println(other.sound); } // NG
+}
+// p2/DogD.java（失敗）
+package p2;
+public class DogD extends Animal {
+    void bark(Cat other) { System.out.println(other.sound); } // NG
+}
+```
+
+（javacで実機検証済み。A, B成功／C, D失敗）
+
+**JLS 6.6.2.1のルール**：別パッケージのサブクラスから継承したprotectedメンバーにアクセスするには、「継承しているかどうか」だけでは不十分で、**アクセスに使う式の型が、アクセスしている側のクラス自身かそのサブタイプでなければならない**。
+
+| | 経由した型 | 判定 | 理由 |
+|---|---|---|---|
+| A | `this`（自分自身） | ○ | 自分自身の型 |
+| B | `DogB`（自分自身） | ○ | 自分自身の型 |
+| C | `Animal`（親クラス型） | ✗ | 実体がDogCでも、コンパイル時の型が親だと不可 |
+| D | `Cat`（無関係な兄弟クラス） | ✗ | Catは`Animal`のサブクラスだが、`DogD`自身でもそのサブタイプでもない |
+
+同一パッケージ内であればこの制約自体がかからず、`Animal`型や`Cat`型経由でも普通にアクセスできる。「package内アクセス」と「別package・サブクラス経由アクセス」は別ルールが重なっている、という構造。
+
+**補足（`this`について）**：`this`は「省略可能な引数」ではなく、インスタンスメソッド呼び出し時にJVMが暗黙で結びつける、構文上書けない特別な参照。`this.sound`と`sound`の違いは「`this.`という表記を省略できるかどうか」であって、`this`そのものの有無を選べるわけではない。
