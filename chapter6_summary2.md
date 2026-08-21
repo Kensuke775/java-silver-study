@@ -77,3 +77,50 @@ final class Grape extends Fruit {}
 - **インタフェースを実装する**→ `implements`
 
 `sealed class Fruit {}` の子が `extends Fruit` になるのは、`Fruit`が`interface`ではなく`class`だから。`sealed interface`を実装する側であれば`implements`になる（この違いは継承元が`class`か`interface`かだけで決まり、`sealed`の有無とは無関係）。
+
+## 応用問題6-2：フィールド隠蔽とオーバーライドの3階層ネスト
+
+```java
+class Base {
+    int x = 10;
+    static String label = "Base";
+    int getX() { return x; }
+    static String getLabel() { return label; }
+}
+class Middle extends Base {
+    int x = 20;
+    static String label = "Middle";
+    int getX() { return x; }
+}
+class Leaf extends Middle {
+    int x = 30;
+    int getX() { return x + super.getX(); }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Base b = new Leaf();
+        Middle m = new Leaf();
+        Leaf l = new Leaf();
+
+        System.out.println(b.x);          // 10
+        System.out.println(m.x);          // 20
+        System.out.println(l.x);          // 30
+        System.out.println(b.getX());     // 50
+        System.out.println(m.getX());     // 50
+        System.out.println(b.label);      // Base
+        System.out.println(Middle.label); // Middle
+    }
+}
+```
+
+（javac/javaで実機検証済み。全問正解）
+
+| トリック | 結論 |
+|---|---|
+| `super.getX()`の遡り範囲 | **直近の親（1階層）だけ**を呼ぶ。祖先を連鎖して全部実行されるわけではない（`Leaf`→`super`で止まり、`Middle.getX()`が`Base.getX()`をさらに呼んだりはしない） |
+| メソッド内の無修飾フィールド`x`の解決基準 | 呼び出し元の宣言型ではなく、**そのメソッドが定義されているクラス自身のフィールド**を指す。`Leaf.getX()`内の`x`は常に`Leaf.x`、`Middle.getX()`内の`x`は常に`Middle.x` |
+| フィールド・static解決 | `b.x`・`m.x`・`l.x`・`b.label`・`Middle.label`は全部**宣言型基準**（動的束縛は一切効かない） |
+| メソッド解決 | `b.getX()`と`m.getX()`は宣言型が違っても、実体が同じ`Leaf`なら**同じ結果**（動的束縛はメソッドにしか効かない） |
+
+→ `Leaf.getX()` = `this.x(30) + super.getX()(Middle.getX()が返す20)` = **50**。宣言型がBaseかMiddleかは無関係で、実体がLeafである限り同じ50になる。
