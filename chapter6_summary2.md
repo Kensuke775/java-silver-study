@@ -272,3 +272,59 @@ a.run();  // → "C.foo"（package-privateのときは"B.foo"だった）
 | `public` | ○ 常に繋がる |
 
 **「オーバーライドの連鎖が途中で切れる」現象はpackage-private特有の弱点であり、`protected`以上のアクセス修飾子では起きない。**
+
+## 応用問題6-5：protectedは子孫すべてに及ぶ／アクセス範囲を狭めるとオーバーライド不成立
+
+### protectedは直接の子だけでなく、何階層先の子孫にも及ぶ
+
+```java
+// p1: Animal（protected speak(), public announce()）
+// p2: Dog extends Animal        ← 別パッケージ。speak()は一切オーバーライドせず、ただ継承するだけ
+// p3: Puppy extends Dog         ← Animalからもp2のDogからも別パッケージ。ここでspeak()をオーバーライド
+```
+
+```java
+Animal a = new Puppy();
+a.announce();   // → "Puppy.speak"
+```
+
+（javac/javaで実機検証済み）`Dog`が何もオーバーライドしていなくても、2階層下の`Puppy`（3つ目の別パッケージ）が問題なく`protected`メンバーを継承・オーバーライドできる。`private`（継承されない）やpackage-private（パッケージが変わった瞬間切れる）と違い、**`protected`は「継承関係にある子孫であれば何階層下でも、パッケージがいくつ変わっても」引き継がれ続ける**。
+
+### オーバーライドでアクセス範囲を狭めるとコンパイルエラー
+
+上と同じ構成で、`Puppy`側だけ`speak()`を`private`にすると：
+
+```java
+private void speak() { System.out.println("Puppy.speak"); }
+```
+```
+エラー: Puppyのspeak()はAnimalのspeak()をオーバーライドできません
+  (protectedより弱いアクセス権限を割り当てようとしました)
+```
+
+（javacで実機検証済み。コンパイル自体が通らず`a.announce()`の実行結果を云々する段階に至らない）
+
+**Q6/Q4の「無関係な別メソッド」パターンとの違い**：同名同シグネチャの子メソッドが「無関係な別物」として黙って許されるのは、**親のメソッドがそもそも子から見えない場合だけ**（Q6のprivate、Q4のpackage-private＋別パッケージ）。親のメソッドが子から見えている場合（今回のprotected）は、子の同名メソッドは**必ずオーバーライドの試みとして扱われ**、アクセス範囲を狭めた瞬間コンパイルエラーになる。
+
+| ケース | 親のメソッドは子から見えるか | 子の同名メソッドの扱い |
+|---|---|---|
+| 親がprivate（Q6） | 見えない | 無関係な別メソッド（エラーなし） |
+| 親がpackage-privateで別パッケージ（Q4） | 見えない | 無関係な別メソッド（エラーなし） |
+| 親がprotected（Q5） | 見える（子孫なら常に） | 正式なオーバーライドとして扱われる→狭めるとエラー |
+
+### アクセス修飾子の広さの順序とオーバーライドの許容範囲
+
+```
+private  <  無印(package-private)  <  protected  <  public
+```
+
+`protected`は「無印と同じ範囲（同一パッケージ）」＋「別パッケージのサブクラス」を足した分だけ広い。オーバーライドする側は元のメソッド**以上**の広さでなければならないため：
+
+| 元のアクセス修飾子 | オーバーライドで使える修飾子 |
+|---|---|
+| private | （継承されないのでオーバーライド自体が発生しない） |
+| 無印(default) | 無印、protected、public |
+| protected | protected、public のみ |
+| public | public のみ |
+
+狭い修飾子ほど、オーバーライド時に選べる選択肢が絞られていく。
