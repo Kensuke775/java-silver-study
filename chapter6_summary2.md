@@ -173,3 +173,77 @@ public class DogD extends Animal {
 同一パッケージ内であればこの制約自体がかからず、`Animal`型や`Cat`型経由でも普通にアクセスできる。「package内アクセス」と「別package・サブクラス経由アクセス」は別ルールが重なっている、という構造。
 
 **補足（`this`について）**：`this`は「省略可能な引数」ではなく、インスタンスメソッド呼び出し時にJVMが暗黙で結びつける、構文上書けない特別な参照。`this.sound`と`sound`の違いは「`this.`という表記を省略できるかどうか」であって、`this`そのものの有無を選べるわけではない。
+
+## 応用問題6-4：package-privateメソッドは「別パッケージを挟んだ瞬間」だけオーバーライドが切れる
+
+### 第1弾：2階層（Base → Sub）
+
+```java
+// p1/Base.java
+package p1;
+public class Base {
+    void greet() { System.out.println("Base.greet"); }  // package-private
+    public void callGreet() { greet(); }
+}
+
+// p2/Sub.java（Baseとは別パッケージ）
+package p2;
+public class Sub extends Base {
+    void greet() { System.out.println("Sub.greet"); }    // package-private
+}
+```
+
+`Base b = new Sub(); b.callGreet();` の結果：
+
+| 状況 | `Sub.greet()`はオーバーライドとして成立するか | `b.callGreet()`の出力 |
+|---|---|---|
+| BaseとSubが**別パッケージ** | ✗ 不成立（`Base`から`Sub`のgreet()は無関係の別メソッド） | `Base.greet`（静的解決） |
+| BaseとSubが**同一パッケージ**だったら | ○ 成立する | `Sub.greet`（動的束縛） |
+
+（javac/javaで両パターンとも実機検証済み）
+
+### 第2弾：3階層（A → B → C、途中にパッケージ境界）
+
+```java
+// p1/A.java
+package p1;
+public class A {
+    void foo() { System.out.println("A.foo"); }   // package-private
+    public void run() { foo(); }
+}
+// p1/B.java（Aと同じパッケージp1）
+package p1;
+public class B extends A {
+    void foo() { System.out.println("B.foo"); }    // package-private
+}
+// p2/C.java（Bとは別パッケージp2）
+package p2;
+public class C extends B {
+    void foo() { System.out.println("C.foo"); }    // package-private
+}
+```
+
+```java
+A a = new C();
+a.run();       // → "B.foo"
+C c = new C();
+c.foo();       // → "C.foo"
+```
+
+（javac/javaで実機検証済み）
+
+**`a.run()`が実行されたときの流れ（`run()`はAで定義されていて、その中の`foo()`が動的束縛の対象になる）**
+
+```
+継承リンクごとに「オーバーライドが成立するか」を1本ずつ判定する:
+
+  A.foo() --p1内、同一パッケージ--> B.foo()   ○ オーバーライド成立
+  B.foo() --p1→p2、別パッケージ---> C.foo()   ✗ オーバーライド不成立（無関係な別メソッド）
+
+  実体はCのオブジェクトだが、foo()という"枠"を最後に正式に上書きしているのはB。
+  Cはその枠を上書きしておらず、C.foo()はCパッケージ内だけで使える別枠。
+
+  → a.run() 内の foo() 呼び出しは、動的束縛でこの枠を辿った結果 B.foo() に着地する。
+```
+
+**この問題の核心（誤解しやすいポイント）**：「継承の途中に別パッケージが1回でも挟まったら、それ以降は全部静的解決になる」わけではない。**オーバーライドの成立・不成立はリンク単位（親子1組ごと）で判定される**。`A→B`のリンクは同一パッケージなので健全に生きたまま、`B→C`のリンクだけが切れる。動的束縛は「実体のクラスが持つ、最も末端の“正式なオーバーライド”」を辿るので、Cが不正規（別枠）である以上、その一つ手前のB.foo()が使われる。
