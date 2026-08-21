@@ -187,7 +187,101 @@ if (br instanceof MobilePhone mp) {  // 実体を確認してから
 
 「型が合っているかどうかの判定を、コンパイラに任せず自分で握ってしまう」のがキャストの本質。ミスがあっても実行するまで気づけない、という点を常に意識する。
 
+### ⑩ instanceofが見るのは「縦のライン」だけ（Q17の発展）
+
+```java
+// 元のコード：OneとTwoは兄弟
+class One extends Zero {}
+class Two extends Zero implements X {}
+// → new Two() は instanceof One が false（共通の親Zeroを持つだけの他人）
+
+// 書き換えたコード：One→Twoの一直線チェーン
+class One extends Zero {}
+class Two extends One implements X {}
+// → new Two() は instanceof Zero も instanceof One も true（縦に繋がっているので全部is-a）
+```
+
+`instanceof`は「実体のクラスから見て、縦方向（祖先、または実装しているインタフェース）に辿り着けるか」だけを見る。共通の祖先を持つだけの「兄弟」同士は無関係。`extends`の相手を1つ変えるだけで、ツリー構造が「兄弟」から「一直線の親子」に変わり、結果が丸ごと変わる。
+
+### ⑪ 用語の整理：オーバーライドとオーバーロードは別物
+
+- **オーバーライド**：親（クラス／interfaceのdefault実装）と**同じシグネチャ**のメソッドを、サブクラス側で上書き・再定義すること
+- **オーバーロード**：**同じ名前で引数リストが違う**メソッドを複数定義すること
+
+カタカナで似ているが全くの別概念。Q18の`MobilePhone`が`Browser`の`default browse()`を上書きしているのはオーバーライド。
+
+### ⑫ アップキャストとダウンキャストの違い、キャストの危険性（Q18）
+
+| | アップキャスト | ダウンキャスト |
+|---|---|---|
+| 方向 | 具体的な型 → 抽象的な型 | 抽象的な型 → 具体的な型 |
+| キャスト構文 | 不要（暗黙・自動） | 必須（`(型)`を明示） |
+| 安全性 | 常に保証される | 実行時まで保証されない |
+
+```java
+Browser br = new MobilePhone();      // 暗黙のアップキャスト（キャスト構文なし）
+MobilePhone mp = (MobilePhone)br;    // 明示的なダウンキャスト（実体がLaptopならClassCastException）
+```
+
+- 通常の型ミスマッチはコンパイル時に発覚するが、**キャストの型ミスマッチはそのコードが実際に実行されるまで発覚しない**。条件分岐やループの奥に埋まっていると、特定条件のときだけ本番で突然落ちる事故になり得る
+- 対策：いきなりキャストせず`if (br instanceof MobilePhone mp) { ... }`で先に確認してから使う
+
+### ⑬ ArrayListのadd/set/removeの引数・戻り値の違い（Q19〜Q21）
+
+```java
+void add(int index, E element)   // 挿入。範囲は 0〜size（sizeちょうどなら末尾に追加できる）
+boolean add(E e)                 // 末尾に追加。常にtrue
+E set(int index, E element)      // 置き換え。範囲は 0〜size-1（既存の要素のみ）。戻り値は置き換え「前」の要素
+E remove(int index)              // インデックス指定で削除。戻り値は削除された要素そのもの
+boolean remove(Object o)         // 値指定で削除。戻り値は削除できたかどうか
+```
+
+- `add()`は末尾なら新しい枠を作れるが、`set()`は既存の要素の上書き専用で新しい枠は作れない（範囲外は`IndexOutOfBoundsException`）。ArrayListは隙間を自動でnull埋めしたりしない
+- `set()`の戻り値は`boolean`ではなく、置き換え前にそこにあった要素そのもの
+- `numbers.remove(1)`の`1`はint型リテラルなので、`remove(int index)`（インデックス版）が呼ばれる。値としての`1`を消したい場合は`numbers.remove(Integer.valueOf(1))`のように明示的にIntegerを渡す必要がある。この曖昧さは**数値系ラッパークラス（Integer, Long等）のリストでだけ**起こり、`List<String>`などでは発生しない（Stringはintに変換しようがないため）
+
+### ⑭ コレクション操作メソッドの一覧：add/put, remove（List/Set/Map）
+
+| コレクション | 追加 | 削除 | 削除の戻り値 |
+|---|---|---|---|
+| List | `add(e)` | `remove(int index)` | 削除された要素そのもの |
+| List | 〃 | `remove(Object o)` | 削除できたか（`boolean`） |
+| Set | `add(e)` | `remove(Object o)` | 削除できたか（`boolean`） |
+| Map | `put(key, value)` | `remove(Object key)` | 紐づいていた値（無ければ`null`） |
+
+- Mapに`add()`というメソッドは存在しない（`put()`のみ）。存在しないメソッドを呼ぼうとするとコンパイルエラー
+- Setの`add()`はboolean戻り値に意味がある（重複していたら`false`）。Listの`add(e)`は常に`true`なので実質意味がない
+- 配列は`println()`でそのまま出力できず`Arrays.toString()`が必要だが、Map/List/Setは自前の`toString()`を持っているので`println()`だけで中身が読める形式になる
+
+### ⑮ ジェネリクスは配列と違って不変（共変ではない）（Q23）
+
+```java
+// 配列は共変：コンパイルは通るが実行時に事故る
+Object[] objs = new String[3];   // ○ String[]はObject[]のサブタイプとして扱われる
+objs[0] = 42;                    // ○ コンパイルは通ってしまう
+                                  // ✗ 実行時に ArrayStoreException（実体はString[3]専用の箱だから）
+
+// ジェネリクスは不変：そもそもコンパイルが通らない
+List<Object> list = new ArrayList<String>();  // ✗ コンパイルエラー
+```
+
+- 配列は「実行時に型チェックする仕組み（ArrayStoreException）」を持つが、ジェネリクスは型消去（実行時に型情報が消える）のためその仕組みが使えない。だから設計上わざと**不変**にして、危険な代入をコンパイル時点で防いでいる
+- ダイヤモンド演算子`<>`で型指定を省略できるのは**右辺のみ**（`List<String> list = new ArrayList<>();`）。左辺（`List<> list = ...`）は省略不可
+- `<E>`は**クラス／メソッドを定義する側**が使う型パラメータのプレースホルダー（`class Box<E> {...}`のような場面専用）。オブジェクトを生成する使う側の場面（`new ArrayList<E>()`など）で書くのは誤り
+- 型パラメータを一切書かない`ArrayList list = new ArrayList();`（raw型）は非推奨だが文法上はコンパイルが通る
+
+### ⑯ Arrays.mismatch()の比較基準はequals()（Q24）
+
+```java
+Object[] oArr = {"100", new String("200"), 300};
+String[] sArr = {"100", "200", "300"};
+Arrays.mismatch(sArr, oArr);  // → 2
+```
+
+- 各要素を`equals()`で比較し、最初に不一致となるインデックスを返す（全一致なら-1）
+- `new String("200")`と`"200"`は参照（`==`）としては別オブジェクトだが、`equals()`で比較しているので値が同じなら一致扱いになる
+- `"300"`（String）と`300`（Integer）は型自体が違うため`equals()`がfalse → ここが最初の不一致
+
 ## 今後の復習ポイント
 
-- ArrayList/HashMapの各メソッドの戻り値の型・シグネチャ違い（`remove(int)` vs `remove(Object)`、`set()`の戻り値など）は未着手（元の24問時点でQ17〜Q23あたりを再度手を動かして確認する）
-- ジェネリクスのダイヤモンド演算子の省略可否（Q23）も要復習
+- 6章末問題（Q1〜Q24）は一通り再確認済み。次章（7章：例外処理）の学習に進む
