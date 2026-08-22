@@ -414,3 +414,76 @@ class Duck implements Flyer, Swimmer {
 interfaceの中では、メソッドは何も書かなければ暗黙的に抽象メソッドになるため、「実装ありですよ」と区別する目印として`default`が必要になる。一方クラスの中では、本体`{}`を書けばそれだけで実装済みメソッドとして扱われるので、区別する目印自体が不要＝`default`という単語がそもそも使えない。**「default＝interface専用のキーワード」**として覚えておく。
 
 （実機検証済み）
+
+### abstractによる明示的再宣言は、default衝突全般に効く（default vs abstractだけではない）
+
+```java
+interface Flyer {
+    default String move() { return "fly"; }
+}
+interface Swimmer {
+    default String move() { return "fly"; }   // Flyerとは無関係に、Swimmerも独立してdefaultを持つ
+}
+abstract class Duck implements Flyer, Swimmer {
+    public abstract String move();             // ← これで衝突が解決する（本体なしでOK）
+}
+```
+
+（実機検証済み・コンパイル成功）
+
+**「abstractで解決できるのはdefault vs abstractの衝突のときだけ」ではない。** Javaが衝突と判定するのは「どの実装を使うべきか自動的に決められない」状態全般であり、これを解消する原則は1つに集約される：
+
+> 衝突している以上、実装クラス（今回は`Duck`）が、自分自身の意思として`move()`が何であるかを明示的に宣言し直さなければならない。
+
+明示的な宣言のやり方は2つ、どちらでも解決できる：
+
+| やり方 | 意味 |
+|---|---|
+| `public String move() { return "..."; }`（本体あり） | 「私はこう実装します」と具体的な答えを自分で用意する |
+| `public abstract String move();`（本体なし） | 「この衝突を認識した上で、意図的に先送りします」と意思を持って先送りする |
+
+default vs default（無関係な2つのdefault）でも、default vs abstractでも、**衝突全般に対してabstractによる明示的な先送りは常に有効**。
+
+ただし「本体なし、`abstract`もなし」（例：`public String move();`）という第3の道は存在しない。本体を書くか、`abstract`を付けるか、必ずどちらか一方を選ぶ必要がある（実機検証済み：`メソッド本体がないか、abstractとして宣言されています`エラーになる）。
+
+### abstractメソッドのアクセス修飾子で「誰が実装を完成できるか」が変わる
+
+```java
+package p1;
+public abstract class Dog {
+    abstract String moveA();   // アクセス修飾子なし = package-private
+}
+```
+
+```java
+// 別パッケージ(p2)から実装しようとすると…
+package p2;
+public class Puppy extends Dog {
+    String moveA() { return "move"; }
+}
+// エラー: Puppyはabstractでなく、Dog内のabstractメソッドmoveA()をオーバーライドしません
+```
+
+```java
+// 同一パッケージ(p1)内からなら実装できる
+package p1;
+public class Terrier extends Dog {
+    String moveA() { return "move"; }
+}
+// コンパイル成功
+```
+
+（実機検証済み）
+
+`moveA()`がpackage-private（無印）だと、別パッケージの`Puppy`からは見えない。見えない以上、`Puppy`が書いた`moveA()`は「無関係な別メソッド」扱いになり、`Dog`が要求する抽象メソッドを満たしたことにならない。そのため`Puppy`は永遠に具象クラスになれず、`abstract`のままにするしかない。同一パッケージ内の`Terrier`なら問題なく実装できる。
+
+**まとめ**：抽象メソッドのアクセス修飾子は「誰がこの抽象メソッドを完成させる権利を持つか」を制御する。
+
+| 抽象メソッドのアクセス修飾子 | 誰が実装（具象化）できるか |
+|---|---|
+| `public`/`protected` | パッケージを問わず、どのサブクラスでも実装可能 |
+| 無印（package-private） | 同一パッケージ内のサブクラスだけ実装可能。別パッケージのサブクラスは永遠にabstractのまま |
+
+**アクセス修飾子まとめ（abstract関連）**：
+- `abstract`メソッドは`private`・`final`と組み合わせ不可（オーバーライドを不可能にする修飾子とは共存できない、6-13/14応用の実施記録参照）
+- `abstract`メソッドに`public`を付けるかどうかは自由だが、**interfaceから継承した抽象メソッドをオーバーライドする場合は、元がpublicなので`public`にしないとアクセス範囲を狭めたことになりコンパイルエラー**（interface由来ではない、素のabstractクラス内で完結する抽象メソッドなら、package-privateのままにする設計判断もあり得る）
