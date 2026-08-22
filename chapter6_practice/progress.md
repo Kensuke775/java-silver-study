@@ -16,7 +16,7 @@
 | 6-13, 6-14 | 抽象メソッド・defaultメソッド衝突 | ✅ 済み | `interface_abstract.md` |
 | 6-15 | interfaceのstaticメンバ | ✅ 済み | `interface_static.md` |
 | 6-16 | sealedのpermits整合性 | ✅ 済み（`sealed_permits.md`に含む） | `sealed_permits.md` |
-| **6-17** | **instanceofと継承チェーン** | **❌ 未実施**（原本の初回セッションでex17を手動実験のみ） | ー |
+| 6-17 | instanceofと継承チェーン | ✅ 済み | `instanceof_hierarchy.md` |
 | **6-18** | **ダウンキャストの危険性** | **❌ 未実施**（原本の初回セッションでex18を手動実験のみ） | ー |
 | **6-19〜6-24** | **コレクション（ArrayList/Set/Map/generics）** | **❌ 未実施** | ー |
 
@@ -28,7 +28,8 @@
 | `records.md` | 1回目（2026-08-22） | 3問中2問完答（2, 3）。1でBを見落とし |
 | `overload_resolution.md` | 1回目（2026-08-22） | パート1〜2・問題2は完答。パート3（null×複数参照型オーバーロード）が誤り |
 | `private_methods.md` | 1回目（2026-08-22） | 一発完答 |
-| `interface_static.md` | 1回目（2026-08-22） | 一発完答（Cで迷ったが正しく選択） |
+| `interface_static.md` | 2回目（2026-08-22） | 1回目一発完答、2回目（出力予測→選択式の別ラウンド）も一発完答 |
+| `instanceof_hierarchy.md` | 1回目（2026-08-22） | null instanceofをtrueと誤答。静的型/動的型の整理で修正 |
 | `sealed_permits.md` | 未実施 | ー |
 | `field_hiding_override.md` | 未実施 | ー |
 | `access_modifiers.md` | 未実施 | ー |
@@ -36,4 +37,4 @@
 
 ## 次にやること
 
-原本の番号順で進めるなら、次は**6-17（instanceofと継承チェーン）**の応用問題から（6-1〜6-16まで完了）。
+原本の番号順で進めるなら、次は**6-18（ダウンキャストの危険性）**の応用問題から（6-1〜6-17まで完了）。
