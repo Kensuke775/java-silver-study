@@ -30,7 +30,7 @@
 | `private_methods.md` | 1回目（2026-08-22） | 一発完答 |
 | `interface_static.md` | 2回目（2026-08-22） | 1回目一発完答、2回目（出力予測→選択式の別ラウンド）も一発完答 |
 | `instanceof_hierarchy.md` | 2回目（2026-08-22） | 1回目：null instanceofをtrueと誤答。2回目：instanceofのコンパイル時チェック（final・クラスvsinterface）で2問誤答→整理して修正 |
-| `downcast.md` | 1回目（2026-08-22） | 2問中1問正解。兄弟クラス同士のキャストが無条件でコンパイルエラーになる点を誤答 |
+| `downcast.md` | 2回目（2026-08-22） | 1回目：2問中1問正解（兄弟クラス同士のキャストを誤答）。2回目：ex18パターン1・2、3階層バージョン、コンパイルエラー混合4問、最終問題（アップキャスト/ダウンキャスト混在）を追加し、全問一発正解 |
 | `sealed_permits.md` | 未実施 | ー |
 | `field_hiding_override.md` | 未実施 | ー |
 | `access_modifiers.md` | 未実施 | ー |
