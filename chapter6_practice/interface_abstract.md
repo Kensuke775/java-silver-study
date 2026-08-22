@@ -384,3 +384,33 @@ class Animal implements Walker, Flyer {
 `abstract`という言葉は「私を継承して完成させて」という約束なので、**それを継承・完成させることを不可能にしてしまう修飾子（`private`か`final`）とは絶対に共存できない**、と覚えておくと今後も迷わない。
 
 （実機検証済み：`protected abstract`・`public abstract`・無印`abstract`はいずれも単体のabstractクラスでは問題なくコンパイルできる）
+
+### defaultキーワードはinterfaceの中でしか使えない（忘れがちな点）
+
+```java
+interface Animal {
+    default String move() { return "move"; }
+}
+interface Flyer extends Animal {
+    default String move() { return "fly"; }   // Animalのmove()をオーバーライド
+}
+interface Swimmer extends Animal {
+    default String move() { return "swim"; }  // Swimmerも別にオーバーライド
+}
+class Duck implements Flyer, Swimmer {
+    public String move() { return "fly"; }     // ← 衝突を解決するクラス側のメソッド
+}
+```
+
+**この形は衝突する**。`Flyer`も`Swimmer`も**両方が独立して**`Animal.move()`をオーバーライドしているため、「最も具体的な方が自動的に選ばれる」ルールが使えない（このルールは片方だけがオーバーライドしている場合にしか働かない）。`Duck`側で明示的に解決する必要がある。
+
+このとき、`Duck`側の解決メソッドに`default`は**書けない**（`修飾子defaultをここで使用することはできません`というコンパイルエラーになる）。
+
+| 場所 | 実装ありのメソッドをどう表すか |
+|---|---|
+| interfaceの中 | `default`キーワードを付ける（付けないと暗黙的にabstract） |
+| クラスの中 | 何も付けず、ただ`{}`本体を書くだけ（デフォルトで実装済み扱い） |
+
+interfaceの中では、メソッドは何も書かなければ暗黙的に抽象メソッドになるため、「実装ありですよ」と区別する目印として`default`が必要になる。一方クラスの中では、本体`{}`を書けばそれだけで実装済みメソッドとして扱われるので、区別する目印自体が不要＝`default`という単語がそもそも使えない。**「default＝interface専用のキーワード」**として覚えておく。
+
+（実機検証済み）
