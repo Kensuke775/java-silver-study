@@ -9,7 +9,7 @@
 | 6-3 | protectedの公開範囲 | ✅ 済み | `access_modifiers.md`問題1 |
 | 6-4 | package-privateと別パッケージ継承 | ✅ 済み | `access_modifiers.md`問題2〜5 |
 | 6-5 | オーバーロードの判定基準 | ✅ 済み | `overload_resolution.md` |
-| **6-6** | **privateメソッドと動的束縛** | **❌ 未実施**（原本の初回セッションで深掘り済み） | ー |
+| 6-6 | privateメソッドと動的束縛 | ✅ 済み | `private_methods.md` |
 | 6-7 | コンストラクタ連鎖 | ✅ 済み | `constructors.md`問題1 |
 | 6-8 | コンストラクタ呼び出し(this/super) | ✅ 済み | `constructors.md`問題2〜5 |
 | 6-9〜6-12 | record関連 | ✅ 済み | `records.md` |
@@ -26,7 +26,8 @@
 |---|---|---|
 | `interface_abstract.md` | 1回目（2026-08-22） | 5問中3問完答（2, 4, 5）。1, 3で復習ポイントあり |
 | `records.md` | 1回目（2026-08-22） | 3問中2問完答（2, 3）。1でBを見落とし |
-| `overload_resolution.md` | 未実施 | ー |
+| `overload_resolution.md` | 1回目（2026-08-22） | パート1〜2・問題2は完答。パート3（null×複数参照型オーバーロード）が誤り |
+| `private_methods.md` | 1回目（2026-08-22） | 一発完答 |
 | `sealed_permits.md` | 未実施 | ー |
 | `field_hiding_override.md` | 未実施 | ー |
 | `access_modifiers.md` | 未実施 | ー |
@@ -34,4 +35,4 @@
 
 ## 次にやること
 
-原本の番号順で進めるなら、次は**6-6（privateメソッドと動的束縛）**の応用問題から（6-5は完了）。
+原本の番号順で進めるなら、次は**6-15（interfaceのstaticメンバ）**の応用問題から（6-1〜6-14まで完了）。
