@@ -487,3 +487,50 @@ public class Terrier extends Dog {
 **アクセス修飾子まとめ（abstract関連）**：
 - `abstract`メソッドは`private`・`final`と組み合わせ不可（オーバーライドを不可能にする修飾子とは共存できない、6-13/14応用の実施記録参照）
 - `abstract`メソッドに`public`を付けるかどうかは自由だが、**interfaceから継承した抽象メソッドをオーバーライドする場合は、元がpublicなので`public`にしないとアクセス範囲を狭めたことになりコンパイルエラー**（interface由来ではない、素のabstractクラス内で完結する抽象メソッドなら、package-privateのままにする設計判断もあり得る）
+
+---
+
+## interfaceに付けられる修飾子まとめ（追加検証・2026-08-23）
+
+### interfaceのメソッドの4種類
+
+| 種類 | 書き方 | 暗黙の修飾子 | インスタンス経由で呼べるか |
+|---|---|---|---|
+| 抽象メソッド | `void x();`（中身なし） | `public abstract` | ✅（実装クラスのインスタンス経由） |
+| defaultメソッド | `default void x() { ... }` | `public` | ✅（実装クラスのインスタンス経由、オーバーライド可） |
+| staticメソッド | `static void x() { ... }`（明示的に`static`が必要） | `public static` | ❌**インターフェース名経由のみ**（`obj.x()`はコンパイルエラー） |
+| privateメソッド（Java9+） | `private void x() { ... }` | なし | interface内部の他メソッドからのみ |
+
+「interfaceのメソッド＝static」ではない。**明示的に`static`と書いたものだけ**がstaticで、それ以外（抽象/default）は普通のインスタンスメソッド。
+
+### interfaceのメンバ（メソッド・フィールド）に付けられる修飾子
+
+| 修飾子 | 可否 | 理由 |
+|---|---|---|
+| `public`（明示） | ✅OK（冗長） | 暗黙で付くので書いても書かなくても同じ |
+| `protected` | ❌NG（実機検証済み：エラー） | interfaceのメンバは「公開契約」の原則があり、段階的なアクセス制御という概念自体が存在しない。interface同士の`extends`でも、フィールドでも一律禁止（implements/extendsの違いは無関係） |
+| 無指定（package-private相当） | — | interfaceでは無指定は自動的に`public`になる（クラスのような package-private という概念は存在しない） |
+| `private`（Java9+、メソッドのみ） | ✅OK | interface内部専用のヘルパーメソッド |
+| `final` | ❌NG（実機検証済み：エラー） | defaultメソッドは実装クラス側でオーバーライド可能なことが前提の仕組みであり、`final`（オーバーライド禁止）と矛盾する |
+
+**要点**：interfaceのメンバは「外部に見せる（`public`）」か「完全に内部だけ（`private`）」の2択しかなく、クラスのような段階的な公開レベル（`protected`・package-private）という概念がそもそも存在しない。
+
+### interface自体（宣言）に付けられる修飾子
+
+| 修飾子 | トップレベル | ネストされたinterface（`class Outer { interface Inner {} }`） |
+|---|---|---|
+| `public` | ✅OK | ✅OK |
+| 無指定 | ✅OK（package-private） | ✅OK（package-private） |
+| `protected` | ❌NG（トップレベル型はpublic/デフォルトのみ、クラスと共通の制約） | ✅OK（ネストされた型は"外側クラスのメンバの1つ"として扱われるため） |
+| `private` | ❌NG | ✅OK |
+| `abstract`（明示） | ✅OK（冗長。interfaceは元々暗黙的にabstract） | ✅OK |
+| `sealed`+`permits` | ✅OK | ✅OK |
+| `final` | ❌NG（「修飾子interfaceとfinalの組合せは不正です」。実装されることが前提の仕組みと矛盾） | 同左 |
+| `static` | ❌NG（「修飾子staticをここで使用することはできません」。staticはネストした型にのみ意味を持つ） | ✅OK（むしろネストした型は暗黙的にstatic扱い） |
+| `strictfp` | ✅OK（ただし警告。Java17以降は常に厳密なので無意味） | 同左 |
+
+**ポイント**：`protected`/`private`/`static`が使えるかどうかは「interfaceかクラスか」ではなく「**トップレベルか、ネストされたメンバか**」という位置で決まる。トップレベル型の制約（public/デフォルトのみ、static不可）はクラス・interface共通。一方「interfaceのメンバ内部」に対する制約（`protected`禁止）はinterface特有のルール。
+
+ネストされたinterfaceの可視性も、`public`/`protected`/無指定/`private`という**普通のクラスメンバと同じ4段階のアクセス制御**に従う（「ネストされている＝ネストの中でしか使えない」という意味ではない。`public`ネストinterfaceは外部から`Outer.Inner`として普通に使える）。
+
+すべてjavac(--release 17)で実機検証済み。

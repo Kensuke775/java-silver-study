@@ -58,7 +58,7 @@ public class Main {
 
 - **A**：正しい。`private static helper()`は同じinterface内の他の`static`/`default`メソッドから普通に呼び出せる。
 - **B**：誤り。interfaceの`static`メソッドは実装クラスにも子interfaceにも継承されない。呼び出しは必ず`Util.square(5)`のように宣言元のinterface名を通す必要があり、`Impl.square(5)`はコンパイルエラー（「シンボルを見つけられません」）。
-- **C**：正しい。interfaceの`static`メソッドはインスタンスAPIに一切参加しないため、実装クラス側が同名同シグネチャのインスタンスメソッドを定義しても無関係な別メソッドとして共存する（検証済み：`i.square(5)`→6、`Util.square(5)`→25、両方独立に動作）。
+- **C**：正しい。interfaceの`static`メソッドはインスタンスAPIに一切参加しないため、実装クラス側が同名同シグネチャのインスタンスメソッドを定義しても無関係な別メソッドとして共存する（検証済み：`i.square(5)`→6、`Util.square(5)`→15、両方独立に動作）。
 - **D**：正しい。interfaceの`static`メソッドは常に本体必須。本体を省略すると「メソッド本体がないか、abstractとして宣言されています」エラー。
 - **E**：誤り。`private`は実際にアクセス制御として機能する。`Util.helper(5)`を外部から呼ぶと「helper(int)はUtilでprivateアクセスされます」というコンパイルエラーになる。
 
