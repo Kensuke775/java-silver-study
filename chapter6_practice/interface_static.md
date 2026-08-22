@@ -83,3 +83,54 @@ public class Main {
 自分で辿り着いた結論：interfaceの`static`メソッドは`インスタンス変数.method()`という呼び出し方ができず、**必ず`Interface名.method()`という形でしか直接呼び出せない**。つまり呼び出し経路（名前空間）そのものが最初から分離されている。だから同じシグネチャであっても「衝突」という概念自体が発生しない——インスタンスメソッドの世界とstaticメソッド（interface名経由）の世界が、そもそも別のレーンにいる。
 
 この気づきは正しい。呼び出し構文の違い（`i.square(5)` vs `Util.square(5)`）がそのまま「オーバーライドの対象になるかならないか」の境界線になっている、という理解でOK。
+
+---
+
+## 2回目ラウンド：private static helper／子interfaceでの独立性（選択式）
+
+```java
+interface Shape {
+    private static double half(double x) { return x / 2; }
+    static double square(double side) { return side * side; }
+    static double triangleArea(double base, double height) { return half(base * height); }
+}
+
+interface ColoredShape extends Shape {
+    static String label() { return "colored"; }
+}
+
+class Circle implements ColoredShape {
+    double radius;
+    Circle(double radius) { this.radius = radius; }
+    double area() { return 3.14 * radius * radius; }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        System.out.println(Shape.square(4));
+        System.out.println(Shape.triangleArea(6, 4));
+        System.out.println(ColoredShape.label());
+        Circle c = new Circle(2);
+        System.out.println(c.area());
+    }
+}
+```
+
+**Q1.** 上記4行の出力として正しいものを選ぶ（A: `16.0 / 12.0 / colored / 12.56`、B: `triangleArea`を`half`せず`24.0`とする誤り、C: `ColoredShape.label()`が`Shape`のprivate static `half`にアクセスできずコンパイルエラーになるという誤った前提、D: `label()`の代わりに`"Circle"`が出るとする誤り）
+
+**Q2.** 末尾に`System.out.println(Circle.square(4));`を追加した場合、コンパイルできるか（E: できる／`Shape`のstaticが`ColoredShape`経由で`Circle`に継承されるという誤った理由、F: できない／interfaceのstaticメソッドは実装クラスに継承されないため）
+
+### 解答
+
+Q1: **A**（`16.0 / 12.0 / colored / 12.56`）　Q2: **F**（継承されないためコンパイル不可）
+
+すべてjavac(--release 17)/javaで実機検証済み。
+
+### 実施記録（2回目・2026-08-22）
+
+| 問題 | 回答 | 正解 | 判定 |
+|---|---|---|---|
+| Q1 | A | A | 正解 |
+| Q2 | F | F | 正解 |
+
+一発完答。Q2の理由付けとして「staticは完全に独立してるはずだから、これは引き継がれなかったはずだと思う」と的確に言語化できていた。
