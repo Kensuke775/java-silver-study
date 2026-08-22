@@ -29,7 +29,7 @@
 | `overload_resolution.md` | 1回目（2026-08-22） | パート1〜2・問題2は完答。パート3（null×複数参照型オーバーロード）が誤り |
 | `private_methods.md` | 1回目（2026-08-22） | 一発完答 |
 | `interface_static.md` | 2回目（2026-08-22） | 1回目一発完答、2回目（出力予測→選択式の別ラウンド）も一発完答 |
-| `instanceof_hierarchy.md` | 1回目（2026-08-22） | null instanceofをtrueと誤答。静的型/動的型の整理で修正 |
+| `instanceof_hierarchy.md` | 2回目（2026-08-22） | 1回目：null instanceofをtrueと誤答。2回目：instanceofのコンパイル時チェック（final・クラスvsinterface）で2問誤答→整理して修正 |
 | `sealed_permits.md` | 未実施 | ー |
 | `field_hiding_override.md` | 未実施 | ー |
 | `access_modifiers.md` | 未実施 | ー |
