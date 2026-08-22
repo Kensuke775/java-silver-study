@@ -17,7 +17,7 @@
 | 6-15 | interfaceのstaticメンバ | ✅ 済み | `interface_static.md` |
 | 6-16 | sealedのpermits整合性 | ✅ 済み（`sealed_permits.md`に含む） | `sealed_permits.md` |
 | 6-17 | instanceofと継承チェーン | ✅ 済み | `instanceof_hierarchy.md` |
-| **6-18** | **ダウンキャストの危険性** | **❌ 未実施**（原本の初回セッションでex18を手動実験のみ） | ー |
+| 6-18 | ダウンキャストの危険性 | ✅ 済み | `downcast.md` |
 | **6-19〜6-24** | **コレクション（ArrayList/Set/Map/generics）** | **❌ 未実施** | ー |
 
 ## 実施済みファイルの正答状況（実施記録より）
@@ -30,6 +30,7 @@
 | `private_methods.md` | 1回目（2026-08-22） | 一発完答 |
 | `interface_static.md` | 2回目（2026-08-22） | 1回目一発完答、2回目（出力予測→選択式の別ラウンド）も一発完答 |
 | `instanceof_hierarchy.md` | 2回目（2026-08-22） | 1回目：null instanceofをtrueと誤答。2回目：instanceofのコンパイル時チェック（final・クラスvsinterface）で2問誤答→整理して修正 |
+| `downcast.md` | 1回目（2026-08-22） | 2問中1問正解。兄弟クラス同士のキャストが無条件でコンパイルエラーになる点を誤答 |
 | `sealed_permits.md` | 未実施 | ー |
 | `field_hiding_override.md` | 未実施 | ー |
 | `access_modifiers.md` | 未実施 | ー |
@@ -37,4 +38,4 @@
 
 ## 次にやること
 
-原本の番号順で進めるなら、次は**6-18（ダウンキャストの危険性）**の応用問題から（6-1〜6-17まで完了）。
+原本の番号順で進めるなら、次は**6-19〜6-24（コレクション：ArrayList/Set/Map/generics）**の応用問題から（6-1〜6-18まで完了）。
