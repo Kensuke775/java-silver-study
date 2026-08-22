@@ -8,7 +8,7 @@
 | 6-2 | フィールド隠蔽 vs オーバーライド | ✅ 済み | `field_hiding_override.md` |
 | 6-3 | protectedの公開範囲 | ✅ 済み | `access_modifiers.md`問題1 |
 | 6-4 | package-privateと別パッケージ継承 | ✅ 済み | `access_modifiers.md`問題2〜5 |
-| **6-5** | **オーバーロードの判定基準** | **❌ 未実施** | ー |
+| 6-5 | オーバーロードの判定基準 | ✅ 済み | `overload_resolution.md` |
 | **6-6** | **privateメソッドと動的束縛** | **❌ 未実施**（原本の初回セッションで深掘り済み） | ー |
 | 6-7 | コンストラクタ連鎖 | ✅ 済み | `constructors.md`問題1 |
 | 6-8 | コンストラクタ呼び出し(this/super) | ✅ 済み | `constructors.md`問題2〜5 |
@@ -26,6 +26,7 @@
 |---|---|---|
 | `interface_abstract.md` | 1回目（2026-08-22） | 5問中3問完答（2, 4, 5）。1, 3で復習ポイントあり |
 | `records.md` | 1回目（2026-08-22） | 3問中2問完答（2, 3）。1でBを見落とし |
+| `overload_resolution.md` | 未実施 | ー |
 | `sealed_permits.md` | 未実施 | ー |
 | `field_hiding_override.md` | 未実施 | ー |
 | `access_modifiers.md` | 未実施 | ー |
@@ -33,4 +34,4 @@
 
 ## 次にやること
 
-原本の番号順で進めるなら、次は**6-5（オーバーロードの判定基準）**の応用問題から。
+原本の番号順で進めるなら、次は**6-6（privateメソッドと動的束縛）**の応用問題から（6-5は完了）。
