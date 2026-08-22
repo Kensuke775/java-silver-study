@@ -18,7 +18,7 @@
 | 6-16 | sealedのpermits整合性 | ✅ 済み（`sealed_permits.md`に含む） | `sealed_permits.md` |
 | 6-17 | instanceofと継承チェーン | ✅ 済み | `instanceof_hierarchy.md` |
 | 6-18 | ダウンキャストの危険性 | ✅ 済み | `downcast.md` |
-| **6-19〜6-24** | **コレクション（ArrayList/Set/Map/generics）** | **❌ 未実施** | ー |
+| 6-19〜6-24 | コレクション（ArrayList/List/Map/Arrays/record×HashSet） | ✅ 済み | `collections.md` |
 
 ## 実施済みファイルの正答状況（実施記録より）
 
@@ -31,6 +31,7 @@
 | `interface_static.md` | 2回目（2026-08-22） | 1回目一発完答、2回目（出力予測→選択式の別ラウンド）も一発完答 |
 | `instanceof_hierarchy.md` | 2回目（2026-08-22） | 1回目：null instanceofをtrueと誤答。2回目：instanceofのコンパイル時チェック（final・クラスvsinterface）で2問誤答→整理して修正 |
 | `downcast.md` | 2回目（2026-08-22） | 1回目：2問中1問正解（兄弟クラス同士のキャストを誤答）。2回目：ex18パターン1・2、3階層バージョン、コンパイルエラー混合4問、最終問題（アップキャスト/ダウンキャスト混在）を追加し、全問一発正解 |
+| `collections.md` | 1回目（2026-08-22） | 6-19〜6-24は全問正解。難問（不変リストAPI差分・拡張for中の削除・record×HashSet）は3問中2問正解（拡張for中の削除でConcurrentModificationExceptionの原因を誤解） |
 | `sealed_permits.md` | 未実施 | ー |
 | `field_hiding_override.md` | 未実施 | ー |
 | `access_modifiers.md` | 未実施 | ー |
@@ -38,4 +39,6 @@
 
 ## 次にやること
 
-原本の番号順で進めるなら、次は**6-19〜6-24（コレクション：ArrayList/Set/Map/generics）**の応用問題から（6-1〜6-18まで完了）。
+6章の原本問題（6-1〜6-24）はすべて完了。残タスクは以下のいずれか：
+- 未実施の4ファイル（`sealed_permits.md`, `field_hiding_override.md`, `access_modifiers.md`, `constructors.md`）を初回実施する
+- 7章（`sample/chap7/`）に進む
