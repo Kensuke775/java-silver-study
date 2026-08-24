@@ -36,6 +36,7 @@
 - [問題34（4.1 throws：文章の正誤選択）](#q34)
 - [問題35（4.1 throws：catch/throwsのスーパークラス指定パターン）](#q35)
 - [問題36（4.1 throws：catch/throwsのワイドニング判定・5パターン一括）](#q36)
+- [問題37（2.1 try-catch：catchで捕まえた後は処理が続行する、というポイント確認）](#q37)
 
 <a id="q1"></a>
 ## 問題1（1.1 例外の発生：ArrayIndexOutOfBoundsExceptionの基本）
@@ -1765,3 +1766,49 @@ E. `loadE()`
 **実施記録**
 
 ユーザー解答：E（正解）。「loadA/loadBはtry-catchが無いが、throws宣言があるので大丈夫」という理解を自力で確認。また「loadAとloadBはどちらが呼ばれるのか」という質問があったが、この2つは互いに呼び出し関係のない独立したメソッドで、いずれも`loadRaw()`を個別に呼んでいるだけ（このコード自体に`main()`は無く、実行順ではなく各メソッド単体のコンパイル可否を判定する問題だった）と回答して整理した。
+
+<a id="q37"></a>
+## 問題37（2.1 try-catch：catchで捕まえた後は処理が続行する、というポイント確認）
+
+「例外が投げられたらそこで処理が全部終わる」という誤解（問題1のような**未catch**の例だけを見て一般化してしまったもの）を、ループ処理で確認する問題。`javac`/`java`で検証済み。
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        String[] inputs = {"10", "abc", "20"};
+        for (String s : inputs) {
+            try {
+                int num = Integer.parseInt(s);
+                System.out.println("parsed:" + num);
+            } catch (NumberFormatException e) {
+                System.out.println("skip:" + s);
+            }
+        }
+        System.out.println("done");
+    }
+}
+```
+
+次のプログラムを実行するとどうなりますか。（1つ選択）
+
+A. `parsed:10` `skip:abc` `parsed:20` `done` の順に出力される
+B. `parsed:10` `skip:abc` の後、`done`は出力されずプログラムが終了する
+C. `parsed:10` が出力された直後、`NumberFormatException`によりプログラムが終了する（`skip:abc`以降は出力されない）
+D. `parsed:10` `skip:abc` `done` が出力される（3個目の`"20"`は処理されない）
+E. コンパイルエラーが発生する
+
+**解答**
+
+正解：**A**
+
+**補足**
+
+- `"10"`：`Integer.parseInt("10")`成功→`parsed:10`。
+- `"abc"`：`NumberFormatException`が発生するが`catch`で捕まる→`skip:abc`。**ここで処理は終わらない**。`catch`ブロックを抜けた後、`for`ループは普通に次の周（`"20"`）へ進む。
+- `"20"`：`Integer.parseInt("20")`成功→`parsed:20`。
+- ループが終わった後、`main()`の最後に書かれている`System.out.println("done")`も普通に実行される。
+- 問題27・29・30・32（try-with-resourcesでコンストラクタが例外を投げる系）で「そこで処理が止まる」ように見えたのは、例外そのものが処理を止めていたのではなく、**`catch`/`finally`ブロックの直後に`main()`がたまたま終わっていた**（後ろに書くコードが無かった）だけ。`catch`で捕まえた後は、後ろにコードがあれば普通に実行され続ける。
+
+**実施記録**
+
+ユーザー解答：A（正解）。「例外＝そこでプログラムが止まる」という誤解の出どころが、過去のtry-with-resources問題（27/29/30/32）で`catch`/`finally`の直後に`main()`が終わっていたことだったと自己分析。実際は「その後にコードがあれば続く」だけで、`catch`が処理を止めているわけではないと整理した。
