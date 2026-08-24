@@ -32,10 +32,10 @@
 - [問題30（3.1 try-with-resources：問題27の改変・未到達リソースの明示化）](#q30)
 - [問題31（3.1 try-with-resources：問題28の改変・suppressedが複数溜まるケース）](#q31)
 - [問題32（3.1 try-with-resources：finallyを組み込んだパターン）](#q32)
+- [問題33（4.1 throws：コードベースのコンパイルエラー特定問題）](#q33)
 - [問題34（4.1 throws：文章の正誤選択）](#q34)
-
-（問題33は未回答のため未掲載。回答後に追記されます。）
-
+- [問題35（4.1 throws：catch/throwsのスーパークラス指定パターン）](#q35)
+- [問題36（4.1 throws：catch/throwsのワイドニング判定・5パターン一括）](#q36)
 
 <a id="q1"></a>
 ## 問題1（1.1 例外の発生：ArrayIndexOutOfBoundsExceptionの基本）
@@ -1515,6 +1515,74 @@ open:I1 open:I2 finally
 
 迷ったところ：なし。直前に`sample/chap7/12/Main.java`（close()自体が例外を投げてcatch→finallyの順になるケース）を自分で実行して確認した流れで、finally入りのtry-with-resourcesを試したいと自分から要望し、一発正解。
 
+<a id="q33"></a>
+## 問題33（4.1 throws：コードベースのコンパイルエラー特定問題）
+
+`javac`で検証済み。
+
+```java
+import java.io.IOException;
+
+public class Main {
+    public static void main(String[] args) {
+        Main obj = new Main();
+        try {
+            obj.stepA();
+        } catch (Exception e) {
+            System.out.println("caught A:" + e.getMessage());
+        }
+        try {
+            obj.stepC();
+        } catch (IOException e) {
+            System.out.println("caught C:" + e.getMessage());
+        }
+        obj.stepD();
+    }
+
+    public void stepA() throws IOException {
+        stepB();
+    }
+
+    public void stepB() throws Exception {
+        throw new IOException("from B");
+    }
+
+    public void stepC() throws IOException {
+        try {
+            stepB();
+        } catch (Exception e) {
+            throw new IOException("wrapped:" + e.getMessage());
+        }
+    }
+
+    public void stepD() throws RuntimeException {
+        System.out.println("D ok");
+    }
+}
+```
+
+このコードには1箇所だけコンパイルエラーがあります。どの行が原因か選んでください。（1つ選択）
+
+A. `stepA()`内の `stepB();`
+B. `stepB()`内の `throw new IOException("from B");`
+C. `stepC()`の try ブロック内の `stepB();`
+D. `main()`内の `obj.stepD();`（try-catchもthrowsも無いまま呼んでいる）
+E. コンパイルエラーは無い（全て正しい）
+
+**解答**
+
+正解：**A**
+
+**補足**
+
+- `stepB()`は`throws Exception`（広い宣言）。`stepA()`は`throws IOException`（狭い宣言）で、`stepB()`をtry-catchせずそのまま呼んでいる。コンパイラは`stepB()`の中身（実際はIOExceptionしか投げていない）を見ず、**宣言された型（Exception）だけ**を見るため、「`stepA`の狭いthrows宣言では受け止めきれない」と判定してコンパイルエラーになる。`javac`のエラーメッセージも該当行を指す：「例外Exceptionは報告されません。スローするには、捕捉または宣言する必要があります」。
+- `stepC()`は`stepB()`呼び出しを`catch (Exception e)`で囲んでいる（宣言と同じ広さで受け止めている）ので問題ない（Cは誤り）。
+- `stepD()`は`throws RuntimeException`（非チェック例外）。非チェック例外は呼び出し元でのcatch/throwsが任意なので、`main()`でそのまま呼び出しても問題ない（Dは誤り）。
+
+**実施記録**
+
+ユーザー解答：D（誤り）。「`throws RuntimeException`の非チェック例外をtry-catchもthrowsも無いまま呼んでいる」ことがコンパイルエラーの原因だと誤解していたが、非チェック例外は無条件で自由に呼び出せるため実際は問題なし。真のエラー箇所は、狭いthrows宣言（`IOException`）で広いthrows宣言（`Exception`）のメソッドをcatchせずに呼んでいた`stepA()`だった。この誤答をきっかけに、catch/throwsの型指定と変数代入の互換性ルール（サブクラス→スーパークラスはOK、逆はNG）が同じ基準で判定されている、という整理を行った。
+
 <a id="ref-throws"></a>
 ## 4.1 throws 要点整理
 
@@ -1557,3 +1625,143 @@ E. あるメソッドAが、throwsにExceptionを指定した別のメソッドB
 **実施記録**
 
 迷ったところ：なし。A, C, Eで一発正解。
+
+<a id="q35"></a>
+## 問題35（4.1 throws：catch/throwsのスーパークラス指定パターン）
+
+`javac`で検証済み。
+
+```java
+import java.sql.SQLException;
+
+public class Main {
+    public static void main(String[] args) {
+        Main obj = new Main();
+        obj.taskA();
+        obj.taskB();
+        obj.taskC();
+    }
+
+    void fetchData() throws Exception {
+        throw new SQLException("db down");
+    }
+
+    void taskA() {
+        try {
+            fetchData();
+        } catch (Exception e) {
+            System.out.println("A caught:" + e.getMessage());
+        }
+    }
+
+    void taskB() {
+        try {
+            fetchData();
+        } catch (SQLException e) {
+            System.out.println("B caught:" + e.getMessage());
+        }
+    }
+
+    void taskC() {
+        try {
+            fetchData();
+        } catch (RuntimeException e) {
+            System.out.println("C caught:" + e.getMessage());
+        }
+    }
+}
+```
+
+どのメソッドが原因でコンパイルエラーになりますか。（2つ選択）
+
+A. `taskA()`
+B. `taskB()`
+C. `taskC()`
+D. `fetchData()`
+E. コンパイルエラーは発生しない
+
+**解答**
+
+正解：**B, C**
+
+**補足**
+
+- `taskA()`：`catch (Exception e)`。`fetchData()`の宣言（`throws Exception`）と**同じ広さ**で受け止めているのでOK。
+- `taskB()`：`catch (SQLException e)`。`fetchData()`は`throws Exception`（広い宣言）なのに、catchは`SQLException`（狭い）だけ。コンパイラは実際にスローされる型ではなく**宣言された型（Exception）**を基準に見るため、狭いcatchでは受け止めきれずエラーになる。
+- `taskC()`：`catch (RuntimeException e)`。`RuntimeException`は`Exception`のサブクラスだが、`fetchData()`が宣言しているチェック例外`Exception`自体は`RuntimeException`ではないので、この方向のcatchは型として噛み合わず全くカバーできない。エラーになる。
+- `fetchData()`自体（D）はどの呼び出し制約も破っておらず、`throws Exception`という宣言として正当。コンパイルエラーの原因はあくまで**呼び出し側**（taskB/taskC）のcatchが宣言に対して狭すぎること。
+
+**実施記録**
+
+ユーザー解答：C, D（部分的に誤り）。Cは正解だが、Bを見落とし、代わりにD（`fetchData()`自体）を選んだ。エラーの原因は宣言している側（`fetchData()`）ではなく、呼び出し側のcatch/throwsが宣言の広さと噛み合っているかどうかである点を訂正した。
+
+<a id="q36"></a>
+## 問題36（4.1 throws：catch/throwsのワイドニング判定・5パターン一括）
+
+`javac`で検証済み。
+
+```java
+import java.io.IOException;
+
+public class Main {
+    void loadRaw() throws IOException {
+        throw new IOException("raw fail");
+    }
+
+    void loadA() throws IOException {
+        loadRaw();
+    }
+
+    void loadB() throws Exception {
+        loadRaw();
+    }
+
+    void loadC() {
+        try {
+            loadRaw();
+        } catch (IOException e) {
+            System.out.println("C:" + e.getMessage());
+        }
+    }
+
+    void loadD() {
+        try {
+            loadRaw();
+        } catch (Exception e) {
+            System.out.println("D:" + e.getMessage());
+        }
+    }
+
+    void loadE() {
+        try {
+            loadRaw();
+        } catch (RuntimeException e) {
+            System.out.println("E:" + e.getMessage());
+        }
+    }
+}
+```
+
+`loadA()`〜`loadE()`のうち、コンパイルエラーになるものをすべて選んでください。
+
+A. `loadA()`
+B. `loadB()`
+C. `loadC()`
+D. `loadD()`
+E. `loadE()`
+
+**解答**
+
+正解：**E**
+
+**補足**
+
+- `loadA()`：`throws IOException`（`loadRaw()`と同じ広さ）で受け止めている。try-catchが無くてもOK——チェック例外は「catchする」か「throwsで宣言する」のどちらか一方で足りる（問題13参照）。
+- `loadB()`：`throws Exception`（`loadRaw()`より広い）で受け止めている。より広い型で宣言するのもOK。
+- `loadC()`：`catch (IOException e)`（同じ広さ）でOK。
+- `loadD()`：`catch (Exception e)`（より広い）でOK。
+- `loadE()`：`catch (RuntimeException e)`だけ、`loadRaw()`の宣言（`IOException`、チェック例外）とワイドニングの関係にならない（`RuntimeException`は`IOException`の継承ツリーの外側＝親でも子でもない）→エラー。
+
+**実施記録**
+
+ユーザー解答：E（正解）。「loadA/loadBはtry-catchが無いが、throws宣言があるので大丈夫」という理解を自力で確認。また「loadAとloadBはどちらが呼ばれるのか」という質問があったが、この2つは互いに呼び出し関係のない独立したメソッドで、いずれも`loadRaw()`を個別に呼んでいるだけ（このコード自体に`main()`は無く、実行順ではなく各メソッド単体のコンパイル可否を判定する問題だった）と回答して整理した。
