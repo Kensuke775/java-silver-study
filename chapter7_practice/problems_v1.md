@@ -1,5 +1,13 @@
 ## 目次
 
+> [!IMPORTANT]
+> **要点整理・参考資料**
+> - [参考資料：例外/エラークラスの和訳・発生状況まとめ](#ref-summary)
+> - [3.1 try-with-resources 要点整理](#ref-trywithresources)
+> - [4.1 throws 要点整理](#ref-throws)
+
+**問題一覧**
+
 - [問題1（1.1 例外の発生：ArrayIndexOutOfBoundsExceptionの基本）](#q1)
 - [問題2（1.1 例外の発生：参考コラム「switch文または式でのthrow」）](#q2)
 - [問題3（1.2 例外の種類：チェック例外／非チェック例外の判別＝コンパイルが通るか）](#q3)
@@ -15,10 +23,8 @@
 - [問題17〜20（例外クラスの継承チェーン暗記ドリル）](#q17-20)
 - [問題22（2.3 multi-catch：catch変数は暗黙的にfinal＝再代入禁止）](#q22)
 - [問題23（継承チェーン11クラス：状況→例外/エラークラス名の対応ドリル）](#q23)
-- [参考資料：例外/エラークラスの和訳・発生状況まとめ](#ref-summary)
 - [問題24（2.3 multi-catchの総合ドリル：兄弟OK／再代入不可／継承関係NG、5択複数選択）](#q24)
 - [問題25（2.3 multi-catchの総合ドリル：仕切り直し版）](#q25)
-- [3.1 try-with-resources 要点整理](#ref-trywithresources)
 - [問題26（3.1 try-with-resources：要点＋エッジケースの正誤判定、5択複数選択）](#q26)
 - [問題27（3.1 try-with-resourcesの応用：リソースのオープン自体が失敗した場合のクローズ挙動）](#q27)
 - [問題28（発展編：tryブロック本体とclose()の両方が例外を投げた場合＝抑制された例外／suppressed exception）](#q28)
@@ -26,7 +32,6 @@
 - [問題30（3.1 try-with-resources：問題27の改変・未到達リソースの明示化）](#q30)
 - [問題31（3.1 try-with-resources：問題28の改変・suppressedが複数溜まるケース）](#q31)
 - [問題32（3.1 try-with-resources：finallyを組み込んだパターン）](#q32)
-- [4.1 throws 要点整理](#ref-throws)
 - [問題34（4.1 throws：文章の正誤選択）](#q34)
 
 （問題33は未回答のため未掲載。回答後に追記されます。）
