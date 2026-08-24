@@ -38,6 +38,7 @@
 - [問題36（4.1 throws：catch/throwsのワイドニング判定・5パターン一括）](#q36)
 - [問題37（2.1 try-catch：catchで捕まえた後は処理が続行する、というポイント確認）](#q37)
 - [問題38（2.1／4.1 まとめ：例外発生時の制御フロー、文章の正誤選択）](#q38)
+- [問題39（4.1 throws：main()のthrows／非チェック例外の任意宣言／広い型でのthrows宣言、文章の正誤選択）](#q39)
 
 <a id="q1"></a>
 ## 問題1（1.1 例外の発生：ArrayIndexOutOfBoundsExceptionの基本）
@@ -1846,3 +1847,49 @@ E. 例外がどの`catch`にもマッチしないまま呼び出し元を遡り�
 **実施記録**
 
 迷ったところ：なし。A, C, Eで一発正解。
+
+<a id="q39"></a>
+## 問題39（4.1 throws：main()のthrows／非チェック例外の任意宣言／広い型でのthrows宣言、文章の正誤選択）
+
+```java
+public class Main {
+    public static void main(String[] args) throws Exception {
+        stepA();
+        stepB();
+    }
+
+    static void stepA() throws RuntimeException {
+        System.out.println("A ok");
+    }
+
+    static void stepB() throws Exception {
+        throw new RuntimeException("B unexpected");
+    }
+}
+```
+
+次のA〜Eのうち、正しい記述をすべて選んでください。
+
+A. `main()`に`throws Exception`と書いてもコンパイルは通る。
+
+B. `stepA()`の`throws RuntimeException`を削除しても、コンパイル結果・実行結果はどちらも変わらない。
+
+C. `stepB()`は実際には`RuntimeException`（非チェック例外）しか投げていないため、`throws Exception`という宣言自体が誤りで、コンパイルエラーになる。
+
+D. `main()`内で`stepB()`をtry-catchで囲んでいなくても、`main()`自身が`throws Exception`を宣言しているためコンパイルは通る。
+
+E. このプログラムを実行すると、`"A ok"`が出力された後、`RuntimeException`が`main()`を通じてJVMまで伝播し、プログラムは異常終了する。
+
+**解答**
+
+正解：**A, B, D, E**
+
+**補足**
+
+- C：誤り。`throws`宣言は「実際に投げている例外そのもの」ではなく「投げる可能性がある型」を書けばよく、実際より広い型（`Exception`）を宣言しても問題ない。ここが引っかけ。
+- B：`RuntimeException`は非チェック例外なので、`throws`宣言の有無はコンパイル・実行のどちらにも影響しない（javacで実際に削除して再検証済み）。
+- 応用パターン：`main()`の宣言を`throws IOException`に変えると（`stepB()`は`throws Exception`のまま）、`stepB();`の呼び出し行でコンパイルエラーになる（`エラー: 例外Exceptionは報告されません`）。チェック例外の「catch or specify」ルールは呼び出しチェーンの各段で毎回チェックされ、途中でcatchされない限り、より上位の呼び出し元も同じかそれを包含できる型を`throws`する必要がある。ユーザーコード側でこのチェックが必要な最後の地点が`main()`で、その先（JVM）はコンパイル時チェックの対象外。
+
+**実施記録**
+
+迷ったところ：A, B, Cを選択（Cが誤り）。DとEを見落とした。Cについて「`stepB()`が実際にはRuntimeExceptionしか投げていないのに`throws Exception`と宣言するのはおかしい」と誤解していたが、javacで検証してコンパイルが通ることを確認して訂正。
