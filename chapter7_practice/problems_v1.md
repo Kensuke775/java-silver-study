@@ -57,11 +57,11 @@ C. `Red` `Green` が出力された後、`ArrayIndexOutOfBoundsException`がス�
 D. コンパイルエラーが発生する
 E. 何も出力されずに`ArrayIndexOutOfBoundsException`がスローされる
 
-### 解答
+**解答**
 
 正解：**C**
 
-### 補足
+**補足**
 
 - `colors.length`は`2`。ループ条件が`i <= colors.length`（`<`ではなく`<=`）になっているため、`i = 0, 1, 2`まで回ろうとする。
 - `i = 0, 1`では`colors[0]="Red"`、`colors[1]="Green"`が正常に出力される。
@@ -69,7 +69,7 @@ E. 何も出力されずに`ArrayIndexOutOfBoundsException`がスローされる
 - try-catchなどの例外処理が書かれていないため、この時点でプログラムは強制終了し、それ以降の`"Done"`は出力されない。
 - `chap7/1/Main.java`（コマンドライン引数なしで`args[0]`にアクセス→同じ例外）と全く同じ「JVMが不正なインデックスアクセスを検知して例外オブジェクトを生成・スローする」という仕組みを、配列リテラル＋forループの形で再現した。
 
-### 実施記録
+**実施記録**
 
 迷ったところ：なし（一発正解）。
 
@@ -101,17 +101,17 @@ C. `switch`式の`default`で`throw`は使用できないため、コンパイ�
 D. `IllegalArgumentException`（メッセージ`Invalid level: 5`）がスローされ、プログラムが終了する
 E. 何も出力されずに正常終了する
 
-### 解答
+**解答**
 
 正解：**D**
 
-### 補足
+**補足**
 
 - `switch`式の各分岐（`->`）は本来、値を返す（式の結果、または`yield`）必要があるが、値の代わりに`throw`で例外をスローすることも許されている（このケースでは「値を返す」という要件自体が免除される）。
 - `level = 5`はどの`case`（1, 2, 3）にも一致しないため`default`に入り、`throw new IllegalArgumentException("Invalid level: " + level)`がそのまま実行される。
 - `IllegalArgumentException`は`RuntimeException`のサブクラスで非チェック例外。例外処理を書かなくてもコンパイルは通り（Cは誤り）、実行時にそのままスローされてプログラムが終了する。`label`への代入や`println`は実行されない。
 
-### 実施記録
+**実施記録**
 
 迷ったところ：なし（一発正解）。
 
@@ -149,17 +149,17 @@ C. `checkIO()`
 D. `checkMemory()`
 E. コンパイルエラーは発生しない
 
-### 解答
+**解答**
 
 正解：**C**
 
-### 補足
+**補足**
 
 - `NullPointerException`・`NumberFormatException`は`RuntimeException`のサブクラス（表7-3）＝非チェック例外。`OutOfMemoryError`は`Error`のサブクラス（表7-4）＝非チェック例外。どちらも例外処理なしでコンパイルが通る。
 - `IOException`は`Exception`のサブクラスで`RuntimeException`系ではない（表7-2）＝チェック例外。catchするか`throws IOException`を宣言しないと「例外IOExceptionは報告されません。スローするには、捕捉または宣言する必要があります」というコンパイルエラーになる（`javac`で検証済み）。
 - ユーザーからの補足質問：`Error`系（`OutOfMemoryError`など）を自分で`new`して`throw`するのは文法的には自由（コンパイラは禁止しない）。ただし実務上、JVMレベルの致命的異常を表す想定のクラスなので、アプリケーションコードから意図的に投げることは通常ない。
 
-### 実施記録
+**実施記録**
 
 迷ったところ：なし。正解の上で「OutOfMemoryErrorを自分で定義（throw）するのは自由なのか」という補足質問があった。
 
@@ -319,17 +319,17 @@ C. `load()`に`throws`宣言がないため、コンパイルエラーになる
 D. `NumberFormatException`が`main`まで伝播し、`DataAccessException`はキャッチされない
 E. 2行とも`null`が出力される
 
-### 解答
+**解答**
 
 正解：**B**
 
-### 補足
+**補足**
 
 - `DataAccessException`は`Exception`ではなく**`RuntimeException`を継承**しているため非チェック例外。`load()`に`throws`宣言がなくてもコンパイルは通る（Cは誤り。問題9の`Exception`継承版との対比ポイント）。
 - `load()`内部の`try-catch`で`NumberFormatException`を捕まえ、それを`cause`として`DataAccessException`に包んで投げ直している（例外のラップ）。外側の`catch (DataAccessException e)`に届くのは包んだ後の`DataAccessException`であり、元の`NumberFormatException`が直接`main`まで伝播するわけではない（Dは誤り）。
 - `getMessage()`は`super(message, cause)`で渡した`"Failed to load data"`をそのまま返す。`getCause()`は包んだ元の例外オブジェクトそのもの（`println`に渡すと`toString()`で`java.lang.NumberFormatException: For input string: "abc"`の形式になる）。
 
-### 実施記録
+**実施記録**
 
 迷ったところ：なし（一発正解）。
 
@@ -364,18 +364,18 @@ C. `try ok ` のみが出力される（`finally`は実行されない）
 D. `catch`がないため、コンパイルエラーになる
 E. `try ` のみが出力され、`finally`は実行されずにプログラムが終了する
 
-### 解答
+**解答**
 
 正解：**B**
 
-### 補足
+**補足**
 
 - `try`は`catch`か`finally`のどちらか一方があれば構文として成立する。`catch`がないこと自体はコンパイルエラーの理由にならない（Dは誤り）。
 - `value < 0`なので`try `の出力後に`throw`が実行され、`ok `には到達しない。
 - **`finally`は`catch`の有無に関わらず必ず実行される**。例外がローカルで捕まらずに上位へ伝播する場合でも、伝播する「前」に`finally`ブロックの処理が実行される。
 - `finally`実行後、`IllegalArgumentException`は誰にもキャッチされていないため`main`まで伝播し、そこでも捕まらずプログラムは異常終了する（`javac`/`java`で検証済み：`try finally `の後にスタックトレースが出力される）。
 
-### 実施記録
+**実施記録**
 
 迷ったところ：なし（一発正解）。
 
@@ -416,17 +416,17 @@ C. `java.lang.NumberFormatException: For input string: "N/A"` が出力される
 D. `ConfigException`に`String message`を受け取るコンストラクタがないため、コンパイルエラーになる
 E. `loadConfig()`に`throws`宣言が必要なため、コンパイルエラーになる
 
-### 解答
+**解答**
 
 正解：**C**
 
-### 補足
+**補足**
 
 - `Throwable(Throwable cause)`コンストラクタ（表7-5）は「指定された原因**と、原因から生成した詳細メッセージ**を持つオブジェクトを生成する」。つまり`message`を明示的に渡さなくても、`cause`の`toString()`が自動的にメッセージとして設定される（Aのように`null`にはならない）。
 - `loadConfig()`はすでに`throws ConfigException`を宣言しているのでコンパイルエラーにはならない（Eは誤り）。`ConfigException`が`String message`用のコンストラクタを持っていなくても、`Throwable cause`用のコンストラクタが使えれば問題ない（Dは誤り）。
 - ユーザーからの補足質問：「必ず例外処理が必要なもの＝チェック例外」は、`Exception`を継承していて**かつ`RuntimeException`（またはそのサブクラス）ではない**もの、というルールを確認。`RuntimeException`自体は`Exception`の子孫だが仕様上チェック対象から除外されている。このルールは自作のカスタム例外にもそのまま当てはまる（`extends Exception`ならチェック、`extends RuntimeException`なら非チェック）。
 
-### 実施記録
+**実施記録**
 
 迷ったところ：なし（一発正解）。
 
@@ -441,11 +441,11 @@ C. `throws`は、例外がスローされる可能性のあるメソッドやコ
 D. チェック例外がスローされる可能性があるプログラムでも、`try-catch`と`throws`のどちらも使わずにコンパイルを成功させることができる
 E. `throws`を使った場合、最終的にはどこかの呼び出し元で`try-catch`による例外処理を行う必要がある
 
-### 解答
+**解答**
 
 正解：**B, C, E**
 
-### 補足
+**補足**
 
 - B：`try-catch`は発生したその場所で捕まえて処理する方法（1.4節本文の記述通り）。
 - C：`throws`は自分では処理せず、例外オブジェクトを呼び出し元に転送するだけの方法。
@@ -453,7 +453,7 @@ E. `throws`を使った場合、最終的にはどこかの呼び出し元で`tr
 - A：誤り。`throws`を書いただけでは処理は完了しない（Eの裏返し）。
 - D：誤り。チェック例外があるプログラムは`try-catch`か`throws`のいずれかを使わないとコンパイルが成功しない。
 
-### 実施記録
+**実施記録**
 
 迷ったところ：なし（一発正解）。
 
@@ -490,17 +490,17 @@ C. `try-end` が出力される
 D. `finally catch` の後、`catch-end` が出力される
 E. `catch`ブロックに`return`があるため、`finally`はスキップされてすぐに`catch-end`が出力される
 
-### 解答
+**解答**
 
 正解：**B**
 
-### 補足
+**補足**
 
 - `method()`が例外をスローするので`catch`ブロックに移り、`"catch "`を出力してから`return "catch-end"`に到達する。
 - ここがポイントで、**`catch`ブロックの中で`return`しても、メソッドが実際に呼び出し元へ値を返す前に必ず`finally`ブロックが実行される**（`chap7/5/Main.java`の`example1()`と同じ注意点）。よって`"finally"`が出力されてから、ようやく`"catch-end"`という戻り値が確定して`main`に返る。
 - `javac`/`java`で検証済み：`catch finally`（1行目）→`catch-end`（2行目）。
 
-### 実施記録
+**実施記録**
 
 迷ったところ：なし。正解の上で「`throws`宣言されたメソッドを呼ぶ側は、必ずtry-catchで囲むかthrowsを宣言しないとコンパイルエラーになるのか」という確認質問があり、その通りと回答（問題13の「throwsで呼び出し元に転送」という選択肢とも繋がる話として整理）。
 
@@ -559,17 +559,17 @@ catch:zero
 finally:override
 ```
 
-### 解答
+**解答**
 
 正解：**B**
 
-### 補足
+**補足**
 
 - `evaluate(0)`：`try`で例外がスローされ`catch`が`return "catch:zero"`をしようとするが、**`finally`ブロックの中に`return`があると、それが`catch`（や`try`）の戻り値を丸ごと上書き（破棄）する**。よって実際に返るのは`"finally:override"`のみで、`"catch:zero"`は表に出てこない。
 - `evaluate(5)`：`x != 0`なので`finally`内の`if`は発火せず、`finally`は何も`return`しない。この場合は素直に`try`の`return "try:5"`がそのまま返る。
 - 「一度`try`や`catch`が`return`を決めたら変えられない」という思い込みが誤答Aの原因になりやすいが、`finally`だけは後から丸ごと上書きできる特別な存在（`javac`/`java`で検証済み）。
 
-### 実施記録
+**実施記録**
 
 迷ったところ：なし（一発正解）。
 
@@ -604,18 +604,18 @@ C. `catch (FileNotFoundException e)` の行でコンパイルエラーになる
 D. 実行時に `ClassCastException` がスローされる
 E. コンパイルは成功するが、`FileNotFoundException`のcatchブロックには実行時に絶対到達しない
 
-### 解答
+**解答**
 
 正解：**C**
 
-### 補足
+**補足**
 
 - 複数の`catch`ブロックは上から下へ順に走査され、最初にマッチした型が実行される。
 - `FileNotFoundException`は`IOException`のサブクラス（`javac`で継承チェーンを確認：`FileNotFoundException → IOException → Exception → Throwable → Object`）。継承関係のある例外は**サブクラス（狭い方）を先に、スーパークラス（広い方）を後に**書く必要がある。
 - 本問は逆順（`IOException`が先、`FileNotFoundException`が後）なので、下の`FileNotFoundException`用`catch`ブロックには絶対に制御が来なくなる（`IOException`側が先に全部拾ってしまうため）。Javaはこれを**単なる警告ではなく明確なコンパイルエラー**として弾く（`javac`で確認：「例外FileNotFoundExceptionはすでに捕捉されています」）。Eのように「コンパイルは成功するが実行時に到達しない」わけではない点に注意。
 - 参考：表7-2〜7-4に載っている例外クラスの中で、お互いに直接の継承関係にあるのは`FileNotFoundException`/`IOException`のペアだけ（他は全て無関係な兄弟同士）。
 
-### 実施記録
+**実施記録**
 
 迷ったところ：なし。「任意/必須（チェック・非チェック）の区別」と「catchの並び順のルール（継承関係の有無）」を一瞬混同したが、説明を受けて「継承関係にある場合はサブクラスを先に書く」という別軸のルールだと正しく整理し、正解した。
 
@@ -669,11 +669,11 @@ D. `OK:5` と `- NFE` の後、`NullPointerException`がどの`catch`にもマ�
 
 E. `OK:5` のみ出力され、2周目以降は例外により即座にプログラムが終了する
 
-### 解答
+**解答**
 
 正解：**A**
 
-### 補足
+**補足**
 
 - `"5"`：`s.length()`（`null`でない）も`Integer.parseInt("5")`（正しい数字）も例外なし。**出力されるのは`len`ではなく`num`**（`len`は`.length()`の結果を持つだけで、実際に`println`されているのは`Integer.parseInt(s)`の結果である`num`）なので`OK:5`。
 - `"abc"`：`Integer.parseInt("abc")`が失敗し`NumberFormatException`→2番目の`catch`でキャッチ→`NFE`。
@@ -681,7 +681,7 @@ E. `OK:5` のみ出力され、2周目以降は例外により即座にプログ
 - `catch`の並び（`ArrayIndexOutOfBoundsException`→`NumberFormatException`→`RuntimeException`）はコンパイルエラーにならない。最初の2つは互いに無関係な兄弟同士で順不同、`RuntimeException`は両方の先祖だが**一番最後（catch-all）に置くのは常にOK**というルール（Cは誤り）。
 - 各ループで`finally`が必ず実行されるため、`try`/`catch`の出力の後には毎回`- `が続く（`javac`/`java`で検証済み）。
 
-### 実施記録
+**実施記録**
 
 迷ったところ：`s.length()`が使われず`Integer.parseInt(s)`の結果（`num`）の方が出力される点に一瞬混乱したが、コード読解の質問を経て正しく理解。3つの入力それぞれのトレース（`OK:5`／`NFE`／`RE:NullPointerException`、いずれも`finally`込み）を自力で正確に組み立てた上でAを選択し、正解。
 
@@ -758,7 +758,7 @@ public class Main {
 
 このプログラムをコンパイル、実行するとどうなりますか。（1つ選択）→正解：**C**（`caught: NumberFormatException`。`NumberFormatException`は`IllegalArgumentException`のサブクラスなので、単独の`catch (IllegalArgumentException e)`で普通に捕まる。`getClass().getSimpleName()`は`catch`の宣言型ではなく実際の例外オブジェクトの型を返すので`NumberFormatException`になる。`javac`/`java`で検証済み）　ユーザー解答：**A（誤り）**。「`NumberFormatException`を明示的にキャッチしていないのでコンパイルエラー」という誤解。問題19（catchが2つあって順序が逆＝コンパイルエラー）とのルールの違いを混同していた——**catchが1つしかない場合は「下の行が無駄になる」という状況自体が発生しないため、コンパイルエラーにはならない**という違いを訂正して説明した。
 
-### 実施記録（17〜20まとめ）
+**実施記録（17〜20まとめ）**
 
 17〜19は一発正解、20は「supertypeでcatchすると常にコンパイルエラーになる」という問題19からの誤った一般化で不正解。catchブロックが1つだけの場合と2つ以上ある場合でルールの適用対象が違う、という点を訂正済み。
 
@@ -787,18 +787,18 @@ C. `catch (NullPointerException | NumberFormatException e)` の宣言自体が�
 D. 実行時に `ClassCastException` がスローされる
 E. 何も出力されずに正常終了する
 
-### 解答
+**解答**
 
 正解：**B**
 
-### 補足
+**補足**
 
 - multi-catch（`catch (TypeA | TypeB e)`）で受け取った例外変数は**暗黙的に`final`**として扱われる。通常の単一`catch`と異なり、この変数への再代入は明示的に禁止されている。
 - `javac`で確認したエラーメッセージ：「複数catchパラメータeに値を代入することはできません」。
 - `NullPointerException`と`NumberFormatException`はお互い無関係の兄弟同士なので、multi-catchで組み合わせること自体は問題ない（Cは誤り。継承関係にある型同士はmulti-catchで組み合わせられないというルールはあるが、この2つはそれに該当しない）。
 - 実行時に何が渡されるか（コマンドライン引数の有無）は今回無関係。これはコンパイルエラーなので、実行される前の段階で失敗する。
 
-### 実施記録
+**実施記録**
 
 迷ったところ：ユーザーから「引数に何が渡る予定か」という質問があったが、これは実行時の話でありコンパイルエラーには無関係と回答。その後の補足説明で、コンパイルエラーの原因（catch変数への再代入）に直接言及してしまい、実質的に答えを明かす形になった（本来はNGな進行だが、ユーザー自身が気づいて指摘）。ユーザーが理由を尋ねたため、そのまま解説して正解Bを確定。
 
@@ -832,89 +832,90 @@ E. 何も出力されずに正常終了する
 
 ①〜⑧それぞれで発生する例外/エラークラス名を答える。
 
-### 解答
+**解答**
 
 正解：① `ArrayIndexOutOfBoundsException` ② `NullPointerException` ③ `ClassCastException` ④ `ArithmeticException` ⑤ `ClassNotFoundException` ⑥ `StackOverflowError` ⑦ `NumberFormatException` ⑧ `FileNotFoundException`
 
-### 補足
+**補足**
 
 - 11クラスの継承チェーンをユーザーが自力で書き出し、`javac`のリフレクション（`getSuperclass()`ループ）で全11個とも完全一致を確認済み。
 - 併せて、マルチキャッチ（`A | B`）は無関係な兄弟要素同士でしか使えず、継承関係のある型（例：`IOException | FileNotFoundException`）を組み合わせると「複数catch文の代替をサブクラス化によって関連付けることはできません」というコンパイルエラーになることを`javac`で実証済み。逆に、catchブロックを下に重ねていく書き方（別々のcatch）は継承関係のある例外にこそ必要な技法（サブクラスを上、スーパークラスを下）であり、両者の使い分けが整理できた。
 
-### 実施記録
+**実施記録**
 
 迷ったところ：なし（8/8全問正解）。
 
 <a id="ref-summary"></a>
 ## 参考資料：例外/エラークラスの和訳・発生状況まとめ
 
-### チェック例外（Exception系）
-
-| クラス | 種別 | どういう時に発生するか |
-|---|---|---|
-| `IOException` | チェック | ファイルやネットワークなど、入出力（I/O）処理が失敗したときに発生。「Input/Output Exception」の略。 |
-| `FileNotFoundException` | チェック（`IOException`のサブクラス） | 指定したパスにファイルが存在しないときに発生。ファイルを開こうとして「そもそも無い」場合。 |
-| `ClassNotFoundException` | チェック | 文字列で指定したクラス名（`Class.forName("...")`など）で、該当するクラスをロードできないときに発生。 |
-
-### 非チェック例外（RuntimeException系）
-
-| クラス | どういう時に発生するか |
-|---|---|
-| `NullPointerException` | `null`が入っている変数に対して、メンバ（メソッドやフィールド）にアクセスしようとしたときに発生。 |
-| `ArrayIndexOutOfBoundsException` | 配列の範囲外のインデックスにアクセスしたときに発生（例：長さ3の配列に`arr[5]`でアクセス）。 |
-| `ClassCastException` | 参照型のキャストが無効なとき（実際の型と互換性のない型へキャストしようとしたとき）に発生。 |
-| `NumberFormatException` | 文字列を数値に変換できないときに発生（例：`Integer.parseInt("abc")`）。 |
-| `ArithmeticException` | 整数をゼロで割った場合など、算術的に不正な演算をしたときに発生（`10 / 0`。`10.0 / 0`は例外にならず`Infinity`になる点に注意）。 |
-
-### Error系（非チェック）
-
-| クラス | どういう時に発生するか |
-|---|---|
-| `NoClassDefFoundError` | コンパイル時には存在したクラスが、実行時にロードできなかったときに発生。 |
-| `StackOverflowError` | 再帰呼び出しなどが深くなりすぎて、呼び出しスタックの上限を超えたときに発生。 |
-| `OutOfMemoryError` | プログラムの実行に必要なメモリ（ヒープなど）を確保できなかったときに発生。 |
-
-### 参考：継承チェーン上の中間クラス（表7-2〜7-4には無いが、catchの型として登場しうる）
-
-| クラス | 何のサブクラスか | 意味 |
-|---|---|---|
-| `IndexOutOfBoundsException` | `RuntimeException` | 「範囲外アクセス」全般を表す親。`ArrayIndexOutOfBoundsException`はこの一種。 |
-| `IllegalArgumentException` | `RuntimeException` | メソッドに不正な引数が渡されたことを表す親。`NumberFormatException`はこの一種。 |
-| `ReflectiveOperationException` | `Exception` | リフレクション関連の操作失敗を表す親。`ClassNotFoundException`はこの一種。 |
-| `LinkageError` | `Error` | クラス間の依存関係・リンクの問題を表す親。`NoClassDefFoundError`はこの一種。 |
-| `VirtualMachineError` | `Error` | JVM自体の異常を表す親。`StackOverflowError`・`OutOfMemoryError`はこの一種。 |
-
-### 参考：全体の形と覚え方のコツ（2026-08-25追記）
-
-11本の鎖をバラバラに覚えるのではなく、木構造の分岐点として覚える。
-
-```
-Throwable
-├─ Exception（チェック例外の起点）
-│   ├─ IOException ── FileNotFoundException
-│   ├─ ReflectiveOperationException ── ClassNotFoundException
-│   └─ RuntimeException（非チェック）
-│       ├─ ArithmeticException
-│       ├─ ClassCastException
-│       ├─ NullPointerException
-│       ├─ IndexOutOfBoundsException ── ArrayIndexOutOfBoundsException
-│       └─ IllegalArgumentException ── NumberFormatException
-└─ Error（非チェック）
-    ├─ LinkageError ── NoClassDefFoundError
-    └─ VirtualMachineError ── StackOverflowError / OutOfMemoryError
-```
-
-**コツ①：途中で分岐する「hub」は6個だけ** — `IOException` / `ReflectiveOperationException` / `IndexOutOfBoundsException` / `IllegalArgumentException` / `LinkageError` / `VirtualMachineError`。これさえ覚えれば残りは全部この6個か`RuntimeException`/`Error`に直結する末端。
-
-**コツ②：末端の名前は親の意味をそのまま含んでいることが多い** — `ArrayIndexOutOfBoundsException`は名前に"IndexOutOfBounds"が入っているので親が分かる。`NoClassDefFoundError`は「クラス定義が見つからない」＝リンクの失敗→`LinkageError`。
-
-**コツ③：意味でグループ化して短文にする**
-- IO系：「ファイルが見つからない(`FileNotFoundException`)のはIOの話」
-- リフレクション系：「クラスが見つからない(`ClassNotFoundException`)のはリフレクションの話」（`Class.forName("文字列")`でクラス名を実行時に探す動作。文字列なのでコンパイル時にチェックできず、失敗しうるからチェック例外）
-- 引数系：「数値の書式がおかしい(`NumberFormatException`)＝不正な引数(`IllegalArgumentException`)の一種」
-- VM系：「VMが死ぬ原因は2つだけ：スタックが溢れる(`StackOverflowError`)か、メモリが尽きる(`OutOfMemoryError`)か」→どちらも`VirtualMachineError`
-
-**コツ④：チェック例外は実質4個（＋名前ルール）と組み合わせる** — `Error`系は名前に必ず"Error"が入るので非チェックと判別しやすい。残る"...Exception"のうち、チェック例外なのは`IOException`/`FileNotFoundException`/`ReflectiveOperationException`/`ClassNotFoundException`（＝IO系とリフレクション系の2ペアのみ）。それ以外の"...Exception"（`RuntimeException`とその子孫）は全部非チェック。
+> [!IMPORTANT]
+> ### チェック例外（Exception系）
+>
+> | クラス | 種別 | どういう時に発生するか |
+> |---|---|---|
+> | `IOException` | チェック | ファイルやネットワークなど、入出力（I/O）処理が失敗したときに発生。「Input/Output Exception」の略。 |
+> | `FileNotFoundException` | チェック（`IOException`のサブクラス） | 指定したパスにファイルが存在しないときに発生。ファイルを開こうとして「そもそも無い」場合。 |
+> | `ClassNotFoundException` | チェック | 文字列で指定したクラス名（`Class.forName("...")`など）で、該当するクラスをロードできないときに発生。 |
+>
+> ### 非チェック例外（RuntimeException系）
+>
+> | クラス | どういう時に発生するか |
+> |---|---|
+> | `NullPointerException` | `null`が入っている変数に対して、メンバ（メソッドやフィールド）にアクセスしようとしたときに発生。 |
+> | `ArrayIndexOutOfBoundsException` | 配列の範囲外のインデックスにアクセスしたときに発生（例：長さ3の配列に`arr[5]`でアクセス）。 |
+> | `ClassCastException` | 参照型のキャストが無効なとき（実際の型と互換性のない型へキャストしようとしたとき）に発生。 |
+> | `NumberFormatException` | 文字列を数値に変換できないときに発生（例：`Integer.parseInt("abc")`）。 |
+> | `ArithmeticException` | 整数をゼロで割った場合など、算術的に不正な演算をしたときに発生（`10 / 0`。`10.0 / 0`は例外にならず`Infinity`になる点に注意）。 |
+>
+> ### Error系（非チェック）
+>
+> | クラス | どういう時に発生するか |
+> |---|---|
+> | `NoClassDefFoundError` | コンパイル時には存在したクラスが、実行時にロードできなかったときに発生。 |
+> | `StackOverflowError` | 再帰呼び出しなどが深くなりすぎて、呼び出しスタックの上限を超えたときに発生。 |
+> | `OutOfMemoryError` | プログラムの実行に必要なメモリ（ヒープなど）を確保できなかったときに発生。 |
+>
+> ### 参考：継承チェーン上の中間クラス（表7-2〜7-4には無いが、catchの型として登場しうる）
+>
+> | クラス | 何のサブクラスか | 意味 |
+> |---|---|---|
+> | `IndexOutOfBoundsException` | `RuntimeException` | 「範囲外アクセス」全般を表す親。`ArrayIndexOutOfBoundsException`はこの一種。 |
+> | `IllegalArgumentException` | `RuntimeException` | メソッドに不正な引数が渡されたことを表す親。`NumberFormatException`はこの一種。 |
+> | `ReflectiveOperationException` | `Exception` | リフレクション関連の操作失敗を表す親。`ClassNotFoundException`はこの一種。 |
+> | `LinkageError` | `Error` | クラス間の依存関係・リンクの問題を表す親。`NoClassDefFoundError`はこの一種。 |
+> | `VirtualMachineError` | `Error` | JVM自体の異常を表す親。`StackOverflowError`・`OutOfMemoryError`はこの一種。 |
+>
+> ### 参考：全体の形と覚え方のコツ（2026-08-25追記）
+>
+> 11本の鎖をバラバラに覚えるのではなく、木構造の分岐点として覚える。
+>
+> ```
+> Throwable
+> ├─ Exception（チェック例外の起点）
+> │   ├─ IOException ── FileNotFoundException
+> │   ├─ ReflectiveOperationException ── ClassNotFoundException
+> │   └─ RuntimeException（非チェック）
+> │       ├─ ArithmeticException
+> │       ├─ ClassCastException
+> │       ├─ NullPointerException
+> │       ├─ IndexOutOfBoundsException ── ArrayIndexOutOfBoundsException
+> │       └─ IllegalArgumentException ── NumberFormatException
+> └─ Error（非チェック）
+>     ├─ LinkageError ── NoClassDefFoundError
+>     └─ VirtualMachineError ── StackOverflowError / OutOfMemoryError
+> ```
+>
+> **コツ①：途中で分岐する「hub」は6個だけ** — `IOException` / `ReflectiveOperationException` / `IndexOutOfBoundsException` / `IllegalArgumentException` / `LinkageError` / `VirtualMachineError`。これさえ覚えれば残りは全部この6個か`RuntimeException`/`Error`に直結する末端。
+>
+> **コツ②：末端の名前は親の意味をそのまま含んでいることが多い** — `ArrayIndexOutOfBoundsException`は名前に"IndexOutOfBounds"が入っているので親が分かる。`NoClassDefFoundError`は「クラス定義が見つからない」＝リンクの失敗→`LinkageError`。
+>
+> **コツ③：意味でグループ化して短文にする**
+> - IO系：「ファイルが見つからない(`FileNotFoundException`)のはIOの話」
+> - リフレクション系：「クラスが見つからない(`ClassNotFoundException`)のはリフレクションの話」（`Class.forName("文字列")`でクラス名を実行時に探す動作。文字列なのでコンパイル時にチェックできず、失敗しうるからチェック例外）
+> - 引数系：「数値の書式がおかしい(`NumberFormatException`)＝不正な引数(`IllegalArgumentException`)の一種」
+> - VM系：「VMが死ぬ原因は2つだけ：スタックが溢れる(`StackOverflowError`)か、メモリが尽きる(`OutOfMemoryError`)か」→どちらも`VirtualMachineError`
+>
+> **コツ④：チェック例外は実質4個（＋名前ルール）と組み合わせる** — `Error`系は名前に必ず"Error"が入るので非チェックと判別しやすい。残る"...Exception"のうち、チェック例外なのは`IOException`/`FileNotFoundException`/`ReflectiveOperationException`/`ClassNotFoundException`（＝IO系とリフレクション系の2ペアのみ）。それ以外の"...Exception"（`RuntimeException`とその子孫）は全部非チェック。
 
 <a id="q24"></a>
 ## 問題24（2.3 multi-catchの総合ドリル：兄弟OK／再代入不可／継承関係NG、5択複数選択）
@@ -931,17 +932,17 @@ E. catch (Exception | RuntimeException e) { System.out.println("ok"); }
 
 コンパイルエラーになるものをすべて選ぶ形式（複数選択）。
 
-### 解答
+**解答**
 
 正解：**B, D, E**（A, Cはコンパイル通る）
 
-### 補足
+**補足**
 
 - A：無関係な兄弟同士＋再代入なし→OK。C：無関係な兄弟同士＋`e.printStackTrace()`は読み取りで再代入ではない→OK。
 - B：`IOException`/`FileNotFoundException`は継承関係→エラー。D：型の組み合わせはOKだが`e = new RuntimeException()`で再代入→エラー。E：`RuntimeException`は`Exception`のサブクラス→エラー。
 - 実用的な見分け方：表7-2〜7-4の11クラスの中で互いに継承関係にあるのは`FileNotFoundException`/`IOException`のペアのみ（問題16参照）。それ以外の9クラス同士の組み合わせは兄弟なので型の面では常にOK、`Exception`/`RuntimeException`/`Throwable`が絡む場合は名前から継承関係が明らかなので判別しやすい。
 
-### 実施記録
+**実施記録**
 
 ユーザーが「コンパイルエラーになるものを選ぶ」という設問文を読み違え、「OKなものを選ぶ」つもりでA, C, Dと回答（実質不正解：D以外は逆）。設問の向きを取り違えていたと自己申告があり、同形式で問題25を再出題。
 
@@ -960,31 +961,32 @@ E. catch (Throwable | Exception e) { System.out.println("ok"); }
 
 コンパイルエラーになるものをすべて選ぶ形式（複数選択）。
 
-### 解答
+**解答**
 
 正解：**C, D, E**（A, Bはコンパイル通る）
 
-### 補足
+**補足**
 
 - A：無関係な兄弟同士＋再代入なし→OK。B：**単一のcatch**（multi-catchではない）なので、変数`e`はfinalではなく再代入自由→OK（このコントラストが問題24のDとの対比ポイント）。
 - C：`NumberFormatException`は`RuntimeException`のサブクラス（`IllegalArgumentException`経由）→エラー。D：型の組み合わせ（`NoClassDefFoundError`/`StackOverflowError`、共にErrorの兄弟）はOKだが`e = null`で再代入→エラー。E：`Exception`は`Throwable`のサブクラス→エラー。
 
-### 実施記録
+**実施記録**
 
 迷ったところ：なし。問題24での設問読み違えを自己修正した上で、C, D, E全て一発正解。
 
 <a id="ref-trywithresources"></a>
 ## 3.1 try-with-resources 要点整理
 
-1. **使えるリソースは`AutoCloseable`実装クラスのみ**（`Closeable`は`AutoCloseable`のサブインタフェース）。
-2. 構文：`try (リソース1; リソース2; ...) { }` — `;`区切りで複数指定可。最後の`;`は省略可。
-3. **クローズは宣言と逆順**（`fw1; fw2` と書けば、閉じるのは`fw2`→`fw1`）。
-4. `AutoCloseable.close()`は`Exception`、`Closeable.close()`は`IOException`をスローしうる → 通常は例外処理が必要。メソッド名は`close()`で固定（このメソッドをオーバーライドしないと自動クローズの対象にならない）。
-5. `var`はリソース宣言では使えるが、**`catch (var e)`は不可**（コンパイルエラー：「'var'はここでは許可されません」）。
-6. **Java 9以降**：事前に宣言済みの変数をそのまま`try(fw)`に渡せる。ただしその変数は**渡す前の時点ですでにfinalまたは実質的final**である必要がある（渡す前に1回でも再代入していると「変数fw1が、finalでも事実上のfinalでもありません」というエラー）。
-7. try内で使うリソース変数（事前宣言・新規宣言どちらも）は実質的final扱いになり、**try/finallyブロック内での再代入は禁止**（＝生成されてからtry()で使われ終わるまでの間、一度も再代入されてはいけない、という1本のルール）。
-8. 通常のtry文と違い、**try-with-resourcesは`catch`も`finally`も省略してtryブロックのみで成立**する（`throws`宣言で伝播させればよい）。
-9. 複数リソースを宣言した場合、初期化（コンストラクタ呼び出し）は**宣言順（左から右）に1つずつ**行われる。途中のリソースのコンストラクタが例外をスローした場合、**それ以降のリソースは初期化されず**、tryブロック本体にも到達しない。**その時点までに正常にオープンできていたリソースだけ**が自動クローズの対象になる（問題27参照）。
+> [!IMPORTANT]
+> 1. **使えるリソースは`AutoCloseable`実装クラスのみ**（`Closeable`は`AutoCloseable`のサブインタフェース）。
+> 2. 構文：`try (リソース1; リソース2; ...) { }` — `;`区切りで複数指定可。最後の`;`は省略可。
+> 3. **クローズは宣言と逆順**（`fw1; fw2` と書けば、閉じるのは`fw2`→`fw1`）。
+> 4. `AutoCloseable.close()`は`Exception`、`Closeable.close()`は`IOException`をスローしうる → 通常は例外処理が必要。メソッド名は`close()`で固定（このメソッドをオーバーライドしないと自動クローズの対象にならない）。
+> 5. `var`はリソース宣言では使えるが、**`catch (var e)`は不可**（コンパイルエラー：「'var'はここでは許可されません」）。
+> 6. **Java 9以降**：事前に宣言済みの変数をそのまま`try(fw)`に渡せる。ただしその変数は**渡す前の時点ですでにfinalまたは実質的final**である必要がある（渡す前に1回でも再代入していると「変数fw1が、finalでも事実上のfinalでもありません」というエラー）。
+> 7. try内で使うリソース変数（事前宣言・新規宣言どちらも）は実質的final扱いになり、**try/finallyブロック内での再代入は禁止**（＝生成されてからtry()で使われ終わるまでの間、一度も再代入されてはいけない、という1本のルール）。
+> 8. 通常のtry文と違い、**try-with-resourcesは`catch`も`finally`も省略してtryブロックのみで成立**する（`throws`宣言で伝播させればよい）。
+> 9. 複数リソースを宣言した場合、初期化（コンストラクタ呼び出し）は**宣言順（左から右）に1つずつ**行われる。途中のリソースのコンストラクタが例外をスローした場合、**それ以降のリソースは初期化されず**、tryブロック本体にも到達しない。**その時点までに正常にオープンできていたリソースだけ**が自動クローズの対象になる（問題27参照）。
 
 <a id="q26"></a>
 ## 問題26（3.1 try-with-resources：要点＋エッジケースの正誤判定、5択複数選択）
@@ -1001,11 +1003,11 @@ E. try-with-resourcesでは、catchまたはfinallyのいずれかを必ず記�
 
 正しい記述をすべて選ぶ形式（複数選択）。
 
-### 解答
+**解答**
 
 正解：**A, C, D**（B, Eは誤り）
 
-### 補足
+**補足**
 
 - A：正しい。`AutoCloseable`（または`Closeable`）実装クラスのみ使用可。
 - B：誤り。クローズは**宣言と逆順**（`javac`/`java`で検証：`A;B;C`の順で宣言→クローズは`C,B,A`の順）。
@@ -1013,7 +1015,7 @@ E. try-with-resourcesでは、catchまたはfinallyのいずれかを必ず記�
 - D：正しい。`try()`に渡す**前**に再代入していると「変数fw1が、finalでも事実上のfinalでもありません」というエラー。`chap7/9/Main.java`の`methodC`（再代入なしでそのまま渡す）との対比がポイント。ラムダ式の実質的finalルールと同じ考え方。
 - E：誤り。try-with-resourcesは**tryブロックのみで成立可能**（`methodC`・`methodD`のようにcatch/finally省略可、チェック例外は`throws`で伝播させればよい）。`chap7/9/Main.java`自体`javac`でコンパイル成功済み。
 
-### 実施記録
+**実施記録**
 
 ユーザー解答：A, C（Dを見落とし、不正解）。「try()に渡す前の再代入」というDのエッジケースを見落とした。Dの実例（再代入後に`try(fw1)`するとコンパイルエラー）を`javac`で示して訂正。あわせて「AutoCloseableを持つリソースとはFileWriterのようなクラスか」という確認質問に回答（BufferedReader・Scanner・InputStream/OutputStream系、自作AutoCloseable実装クラスも該当）。
 
@@ -1085,11 +1087,11 @@ close:A
 body
 ```
 
-### 解答
+**解答**
 
 正解：**B**
 
-### 補足
+**補足**
 
 - リソースは`try()`内の宣言順（左から右）に、1つずつコンストラクタが呼ばれて初期化される。
 - `a`は正常にオープン（`open:A`）。`b`のコンストラクタは`fail=true`のため、`open:B`を出力する前に`RuntimeException`をスローする＝**bは一度もオープンされていない**。
@@ -1097,7 +1099,7 @@ body
 - **オープンに成功したリソースだけが自動クローズの対象**になる。よってクローズされるのは`a`のみ（`close:A`）。Aの選択肢のように未オープンの`b`が`close()`されることはない。
 - `RuntimeException`が伝播し`catch`でキャッチ→`caught:open fail:B`。
 
-### 実施記録
+**実施記録**
 
 迷ったところ：ユーザーから「複数リソースが連続で宣言されている場合、初期化はどう流れるか」「closeは必ず呼ばれるのか」「close()という名前は決まっているのか」という3つの確認質問があり、いずれも一般論の範囲で回答（今回のひねり＝オープン失敗時のクローズ対象については触れずに解答前の説明を留めた）。その上でB「open:A → close:A → caught:open fail:B」という正確なトレースを自力で組み立てて正解。
 
@@ -1158,18 +1160,18 @@ D. `body`のみが出力され、`close()`は呼ばれない
 
 E. `closing`が先に出力され、`body`は実行されない
 
-### 解答
+**解答**
 
 正解：**A**
 
-### 補足
+**補足**
 
 - `try`本体で`RuntimeException("body failed")`がスローされた後、tryブロックを抜ける際に`close()`が呼ばれ、そこでも`IllegalStateException("close failed")`がスローされる。
 - **すでに主例外（try本体の例外）が存在する場合、`close()`が投げた例外はそれを上書きせず、主例外に「抑制された例外（suppressed exception）」として付加される**（`Throwable.addSuppressed()` / `getSuppressed()`）。伝播するのはあくまで`body failed`の方。
 - `catch`で受け取るのは`RuntimeException("body failed")`なので`caught:body failed`。`e.getSuppressed()`で`close failed`も取得できる（`suppressed:close failed`）。
 - 対比：もし`try`本体が例外を投げず`close()`だけが例外を投げた場合は、その`close()`の例外がそのまま主例外として`catch`に届く（Bのパターン）。
 
-### 実施記録
+**実施記録**
 
 迷ったところ：なし（一発正解）。
 
@@ -1260,18 +1262,18 @@ closing:A
 caught:open fail:C
 ```
 
-### 解答
+**解答**
 
 正解：**A**
 
-### 補足
+**補足**
 
 - 問題27（部分オープン失敗）と問題28（close()も例外を投げる）の合体パターン。
 - A, Bはオープン成功。Cのコンストラクタで例外（`open fail:C`）→ この時点で**Cはopen扱いにならず、close対象にもならない**。
 - 巻き戻しは「成功して開いた分だけ、開いた順の逆」＝B→A。Bのclose()が例外を投げても、**Aのclose()は独立して必ず実行される**（Bのclose失敗が他のcloseをスキップさせることはない）。
 - 主例外は常に**最初に発生した例外**（`open fail:C`）。close()側の例外（`close fail:B`）は主例外を上書きせず、`addSuppressed()`で付加されるだけ。
 
-### 実施記録
+**実施記録**
 
 自力でトレースを最初から最後まで正確に導出し、正解Aで一発正解。唯一の質問は`e.getSuppressed()`のforループの意味（ぶら下がっている例外の数だけ回る、0個なら丸ごとスキップ）で、これは回答後のフォローアップとして回答。
 
@@ -1337,17 +1339,17 @@ E.
 open:P1 open:P2 open:P3 body close:P2 close:P1 caught:open fail:P3
 ```
 
-### 解答
+**解答**
 
 正解：**A**
 
-### 補足
+**補足**
 
 - P1, P2はopen成功。P3のコンストラクタが例外を投げ、この時点で**P3はopen扱いにならない**ため、以降のリソース初期化（P4）は評価自体が行われない（open:P4は出力されない）。
 - クローズは「成功して開いた分だけ、開いた順の逆」＝P2→P1。
 - try本体は一度も実行されない（bodyは出力されない）。
 
-### 実施記録
+**実施記録**
 
 トレース自体（open:P1 open:P2 open:P3 close:P2 close:P1 caught:open fail:P3）は最初から正確に導出できていたが、回答時に選んだ記号が「B」で、自分のトレース内容（A相当）と食い違っていた。中身の理解は正しく、記号選択のミスと判断。
 
@@ -1416,17 +1418,17 @@ E.
 open:P1 open:P2 close:P1 close:P2 caught:body fail suppressed:close fail:P1 suppressed:close fail:P2
 ```
 
-### 解答
+**解答**
 
 正解：**A**
 
-### 補足
+**補足**
 
 - 主例外は常に**最初に発生した例外**（tryボディの`body fail`）。close()側の例外はどちらも主例外を上書きせず、`addSuppressed()`で付加されるだけ。
 - close()はオープンの逆順（P2→P1）で実行される。両方とも例外を投げるが、**片方のclose失敗がもう片方のcloseをスキップさせることはない**（P1のcloseも独立して必ず実行される）。
 - `getSuppressed()`の並び順は宣言順でもopen順でもなく、**close実行時に例外が実際に発生した順**＝P2→P1。
 
-### 実施記録
+**実施記録**
 
 迷ったところ：なし。トレースを完全に自力で導出し一発正解。回答後、suppressedの並び順の根拠（先に例外が発生した方が先に入るのか）を確認する質問があり、close実行順＝発生順がそのまま反映される旨を回答。
 
@@ -1494,30 +1496,31 @@ E.
 open:I1 open:I2 finally
 ```
 
-### 解答
+**解答**
 
 正解：**A**
 
-### 補足
+**補足**
 
 - I2のコンストラクタで例外→I2はopen扱いにならない。close対象は成功して開いたI1のみ。
 - try本体は一度も実行されない（bodyは出力されない）。
 - **finallyはcatchブロックの処理が終わった後、一番最後に実行される**（try-with-resourcesのclose()を含めても、この順序自体は通常のtry-catch-finallyと変わらない）。
 
-### 実施記録
+**実施記録**
 
 迷ったところ：なし。直前に`sample/chap7/12/Main.java`（close()自体が例外を投げてcatch→finallyの順になるケース）を自分で実行して確認した流れで、finally入りのtry-with-resourcesを試したいと自分から要望し、一発正解。
 
 <a id="ref-throws"></a>
 ## 4.1 throws 要点整理
 
-- **throwsは例外処理のもう1つの方法**：try-catchが「その場で処理する」のに対し、throwsは「例外がスローされる可能性があるメソッド」に付けて、**処理を呼び出し元に委ねる**仕組み。
-- 構文：`戻り値の型 メソッド名(引数リスト) throws 例外クラスの型 {}`。`,`区切りで複数指定可。指定できるのは`Throwable`のサブクラス。
-- **main()にもthrows指定は可能**（コンパイルも通る）。ただしmain()の呼び出し元はJVMであり、実際に例外がスローされればそこでプログラムが終了するだけ。
-- **非チェック例外はthrows指定が任意**（`throws RuntimeException`と書いてもいい）。呼び出し元での処理も任意のまま。
-- **throwsには実際にスローする例外の「スーパークラス」も指定できる**（例：内部で`IOException`を投げるが、throwsには`Exception`と書く＝OK）。
-- 逆に、**呼び出し先のthrowsで宣言された型より狭い型しかthrowsしていない場合はコンパイルエラー**（呼び出し先が`throws Exception`なのに、呼び出し元が`throws IOException`だけでは不十分）。
-- メリット：複数メソッドで似たような例外処理を書く代わりに、throwsで委譲を連鎖させ、呼び出し元（例：main）で1箇所にまとめてtry-catchできる（図7-5のコード重複削減パターン）。
+> [!IMPORTANT]
+> - **throwsは例外処理のもう1つの方法**：try-catchが「その場で処理する」のに対し、throwsは「例外がスローされる可能性があるメソッド」に付けて、**処理を呼び出し元に委ねる**仕組み。
+> - 構文：`戻り値の型 メソッド名(引数リスト) throws 例外クラスの型 {}`。`,`区切りで複数指定可。指定できるのは`Throwable`のサブクラス。
+> - **main()にもthrows指定は可能**（コンパイルも通る）。ただしmain()の呼び出し元はJVMであり、実際に例外がスローされればそこでプログラムが終了するだけ。
+> - **非チェック例外はthrows指定が任意**（`throws RuntimeException`と書いてもいい）。呼び出し元での処理も任意のまま。
+> - **throwsには実際にスローする例外の「スーパークラス」も指定できる**（例：内部で`IOException`を投げるが、throwsには`Exception`と書く＝OK）。
+> - 逆に、**呼び出し先のthrowsで宣言された型より狭い型しかthrowsしていない場合はコンパイルエラー**（呼び出し先が`throws Exception`なのに、呼び出し元が`throws IOException`だけでは不十分）。
+> - メリット：複数メソッドで似たような例外処理を書く代わりに、throwsで委譲を連鎖させ、呼び出し元（例：main）で1箇所にまとめてtry-catchできる（図7-5のコード重複削減パターン）。
 
 <a id="q34"></a>
 ## 問題34（4.1 throws：文章の正誤選択）
@@ -1536,16 +1539,16 @@ D. main()メソッドにthrowsを指定することはできない。
 
 E. あるメソッドAが、throwsにExceptionを指定した別のメソッドBを、try-catchで囲まずに呼び出す場合、メソッドA自身のthrowsにも、Bのthrowsと同等以上に広い例外を指定する必要がある。
 
-### 解答
+**解答**
 
 正解：**A, C, E**
 
-### 補足
+**補足**
 
 - B：throwsには実際にスローする例外の**スーパークラス**を指定できる（例：内部で`IOException`を投げるが、throwsには`Exception`と書いてもよい）。「完全に同じ型でなければならない」は誤り。
 - D：main()にもthrowsは指定可能でコンパイルも通る。ただしmain()の呼び出し元はJVMのため、実際にスローされればそこでプログラムが終了するだけ。
 - E：問題33で検証済みのルールを文章化したもの（呼び出し先のthrowsで宣言された型より狭い型しか呼び出し元がカバーしていない場合はコンパイルエラー）。
 
-### 実施記録
+**実施記録**
 
 迷ったところ：なし。A, C, Eで一発正解。
