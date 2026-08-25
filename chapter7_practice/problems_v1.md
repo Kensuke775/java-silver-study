@@ -39,6 +39,9 @@
 - [問題37（2.1 try-catch：catchで捕まえた後は処理が続行する、というポイント確認）](#q37)
 - [問題38（2.1／4.1 まとめ：例外発生時の制御フロー、文章の正誤選択）](#q38)
 - [問題39（4.1 throws：main()のthrows／非チェック例外の任意宣言／広い型でのthrows宣言、文章の正誤選択）](#q39)
+- [問題40（4.1 throws：チェック例外のcatch-or-specify、呼び出しチェーン3段構成）](#q40)
+- [問題41（4.1 throws：例外の変換＝チェック例外をcatchして別の非チェック例外にラップして投げ直すパターン）](#q41)
+- [問題42（4.1 throws：3段の呼び出しチェーン＋型が合わないcatchが途中に紛れ込むパターン）](#q42)
 
 <a id="q1"></a>
 ## 問題1（1.1 例外の発生：ArrayIndexOutOfBoundsExceptionの基本）
@@ -1893,3 +1896,179 @@ E. このプログラムを実行すると、`"A ok"`が出力された後、`Ru
 **実施記録**
 
 迷ったところ：A, B, Cを選択（Cが誤り）。DとEを見落とした。Cについて「`stepB()`が実際にはRuntimeExceptionしか投げていないのに`throws Exception`と宣言するのはおかしい」と誤解していたが、javacで検証してコンパイルが通ることを確認して訂正。
+
+<a id="q40"></a>
+## 問題40（4.1 throws：チェック例外のcatch-or-specify、呼び出しチェーン3段構成）
+
+```java
+import java.io.IOException;
+
+public class Main {
+    public static void main(String[] args) {
+        try {
+            outer();
+        } catch (IOException e) {
+            System.out.println("caught in main: " + e.getMessage());
+        }
+    }
+
+    static void outer() throws IOException {
+        middle();
+    }
+
+    static void middle() throws IOException {
+        inner();
+    }
+
+    static void inner() throws IOException {
+        throw new IOException("boom");
+    }
+}
+```
+
+次のA〜Eのうち、正しい記述をすべて選んでください。
+
+A. `outer()`と`middle()`はどちらも自分では`throw`していないが、`inner()`が投げる可能性のある`IOException`を伝播させるためには`throws IOException`の宣言が必要である。
+
+B. `middle()`の`throws IOException`を削除すると、`outer()`のコンパイルでエラーになる。
+
+C. `main()`は`throws IOException`を宣言していないが、`try-catch`で`IOException`を捕捉しているためコンパイルは通る。
+
+D. このプログラムを実行すると、`"caught in main: boom"`が出力される。
+
+E. `inner()`の`throws IOException`宣言を削除すると、`inner()`メソッド自体がコンパイルエラーになる（`throw`している型を宣言していないため）。
+
+**解答**
+
+正解：**A, C, D, E**
+
+**補足**
+
+- B：誤り。`middle()`の`throws IOException`を削除すると、エラーは`outer()`ではなく**`middle()`自身**（`inner();`の呼び出し行）で起きる。チェック例外は「対処されていないその場所そのもの」がエラー地点になり、1つ上の呼び出し元まで遡ってエラーになるわけではない、という点が引っかけ。
+- E：`throw`文で直接投げているチェック例外も、`throws`宣言かtry-catchで対処していなければ、その`throw`文の行自体でコンパイルエラーになる（javacで検証済み：`throw new IOException("boom");`の行でエラー）。
+
+**実施記録**
+
+迷ったところ：A, C, Dは正解したが、Eを見落とした（`inner()`のthrows削除時のエラー発生箇所を意識していなかった）。
+
+<a id="q41"></a>
+## 問題41（4.1 throws：例外の変換＝チェック例外をcatchして別の非チェック例外にラップして投げ直すパターン）
+
+```java
+import java.io.IOException;
+
+public class Main {
+    public static void main(String[] args) {
+        try {
+            outer();
+        } catch (Exception e) {
+            System.out.println("caught in main: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+        }
+    }
+
+    static void outer() throws Exception {
+        try {
+            middle();
+        } catch (IOException e) {
+            throw new IllegalStateException("wrapped: " + e.getMessage());
+        }
+    }
+
+    static void middle() throws IOException {
+        inner();
+    }
+
+    static void inner() throws IOException {
+        throw new IOException("boom");
+    }
+}
+```
+
+次のA〜Eのうち、正しい記述をすべて選んでください。
+
+A. `outer()`の`throws Exception`宣言を削除しても、コンパイル結果・実行結果はどちらも変わらない。
+
+B. `main()`の`catch (Exception e)`は、`outer()`から投げられる`IllegalStateException`を型が異なるため捕捉できない。
+
+C. このプログラムを実行すると、`"caught in main: IllegalStateException - wrapped: boom"`が出力される。
+
+D. `middle()`や`inner()`が投げる`IOException`は`outer()`内のtry-catchで処理されているため、`outer()`自身は`throws IOException`を宣言する必要がない。
+
+E. もし`outer()`をtry-catchなしの単純な伝播（`static void outer() throws IOException { middle(); }`）に戻した場合、`main()`側の`catch (Exception e)`はそのまま`IOException`も捕捉できる。
+
+**解答**
+
+正解：**A, C, D, E**
+
+**補足**
+
+- B：誤り。`IllegalStateException → RuntimeException → Exception`という継承関係があるため、`IllegalStateException`のインスタンスは常に`Exception`型にアップキャストでき、`catch (Exception e)`で問題なく捕捉できる（実行結果でも確認済み）。
+- A：`outer()`が実際に投げているのは非チェック例外`IllegalStateException`のみで、`IOException`は内部のtry-catchで既に処理し尽くされている。つまり`throws Exception`は元々不要な「飾り」で、削除しても結果は変わらない（javacで検証済み）。
+- 「チェック例外をcatchして意味の対応する非チェック例外に変換して投げ直す」exception translationという実務でもよくあるパターンだった。
+
+**実施記録**
+
+迷ったところ：A, C, Eは正解したが、Bを誤って選択し、Dを見落とした。継承関係によるアップキャストでの捕捉（B）と、内部で処理済みならthrows不要（D）の理解が曖昧だった。
+
+<a id="q42"></a>
+## 問題42（4.1 throws：3段の呼び出しチェーン＋型が合わないcatchが途中に紛れ込むパターン）
+
+```java
+import java.io.IOException;
+
+public class Main {
+    public static void main(String[] args) {
+        try {
+            level1();
+        } catch (IOException e) {
+            System.out.println("caught in main: " + e.getMessage());
+        }
+    }
+
+    static void level1() throws IOException {
+        try {
+            level2();
+        } catch (NullPointerException e) {
+            System.out.println("level1 caught NPE");
+        }
+    }
+
+    static void level2() throws IOException {
+        try {
+            level3();
+        } catch (ArithmeticException e) {
+            System.out.println("level2 caught arithmetic");
+        }
+    }
+
+    static void level3() throws IOException {
+        throw new IOException("deep boom");
+    }
+}
+```
+
+次のA〜Eのうち、正しい記述をすべて選んでください。
+
+A. `level1()`と`level2()`はそれぞれtry-catchを持っているが、catchしている型（`NullPointerException`、`ArithmeticException`）が`IOException`と無関係なため、どちらも`throws IOException`を宣言しないとコンパイルエラーになる。
+
+B. このプログラムを実行すると、`"level1 caught NPE"`や`"level2 caught arithmetic"`は一切出力されず、`"caught in main: deep boom"`だけが出力される。
+
+C. `level2()`の`catch (ArithmeticException e)`を`catch (IOException e)`に変更すると、`level3()`が投げた例外は`level2()`で捕まり、`main()`側のcatchは実行されなくなる。
+
+D. `level1()`の`throws IOException`宣言を削除すると、コンパイルエラーになる。
+
+E. `main()`の`catch (IOException e)`を`catch (Exception e)`に変えても、同じように`"caught in main: deep boom"`が出力される。
+
+**解答**
+
+正解：**A, B, C, D, E**（全部正しい）
+
+**補足**
+
+- A：`NullPointerException`・`ArithmeticException`は非チェック例外なので、そのcatchの存在自体は`IOException`への対処にはならない。`level1()`・`level2()`はそれぞれ独立して`throws IOException`が必要（片方だけでは不十分。javacで個別に検証済み）。
+- 非チェック例外は「try内で実際に発生しうるか」をコンパイラがチェックしないため、明らかに発生しないtry内にも自由にcatchを書ける。一方チェック例外は「try内で実際に発生しうるか」を厳密にチェックされる（`level1()`のthrows削除時に、`main()`側の`catch (IOException e)`まで道連れでエラーになったのはこのため）。
+- 例外は`throw`地点から呼び出し元へ1段ずつ遡り、型がマッチする最初のcatchで止まる。型の合わないcatchは完全にスキップされる（B・C）。
+
+**実施記録**
+
+迷ったところ：B, C, D, Eは正解したが、Aを見落とした（`level1()`・`level2()`それぞれ個別にthrowsが必要という点への意識が薄かった）。
