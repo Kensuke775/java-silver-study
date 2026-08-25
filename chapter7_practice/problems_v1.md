@@ -44,6 +44,7 @@
 - [問題42（4.1 throws：3段の呼び出しチェーン＋型が合わないcatchが途中に紛れ込むパターン）](#q42)
 - [問題43（総合：try-with-resources＋suppressed例外＋finallyの横断問題）](#q43)
 - [問題44](#q44)
+- [問題45](#q45)
 
 <a id="q1"></a>
 ## 問題1（1.1 例外の発生：ArrayIndexOutOfBoundsExceptionの基本）
@@ -2190,3 +2191,52 @@ E. もし`main()`の`throws SQLException`を削除すると、コンパイルエ
 回答：A, C, D, E
 正解：A, B, C, D, E
 迷ったポイント：Bを見落とした（risky()が実際にはSQLExceptionしか投げていないため、IOExceptionのcatchは一度も実行されない点）。
+
+<a id="q45"></a>
+## 問題45
+
+```java
+import java.io.*;
+
+class Base {
+    void method() throws IOException {
+        System.out.println("Base");
+    }
+}
+
+class Sub extends Base {
+    @Override
+    void method() {
+        System.out.println("Sub");
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Base ref = new Sub();
+        try {
+            ref.method();
+        } catch (IOException e) {
+            System.out.println("caught");
+        }
+    }
+}
+```
+
+次のA〜Eのうち、正しい記述をすべて選んでください。
+
+A. `Sub`の`method()`は`throws`を宣言していないが、`Base`の`method()`をオーバーライドすることに問題はない。
+
+B. `main()`内の`ref.method();`がtry-catchで囲まれているのは、`ref`の**宣言された型（`Base`）**が`throws IOException`を持っているためであり、実際に生成されるインスタンスが`Sub`かどうかは無関係である。
+
+C. もし`main()`のtry-catchを削除して単に`ref.method();`とだけ書くと、実行時オブジェクトは`Sub`であり実際には`IOException`を投げないにもかかわらず、コンパイルエラーになる。
+
+D. このプログラムを実行すると、`"Sub"`が出力され、`"caught"`は出力されない。
+
+E. もし`Base ref = new Sub();`を`Sub ref = new Sub();`に変更した場合、`ref.method();`の呼び出しをtry-catchで囲む必要はなくなる。
+
+**実施記録**
+
+回答：A, B, C, D, E
+正解：A, B, C, D, E
+迷ったポイント：なし。
