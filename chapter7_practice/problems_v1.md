@@ -43,6 +43,7 @@
 - [問題41（4.1 throws：例外の変換＝チェック例外をcatchして別の非チェック例外にラップして投げ直すパターン）](#q41)
 - [問題42（4.1 throws：3段の呼び出しチェーン＋型が合わないcatchが途中に紛れ込むパターン）](#q42)
 - [問題43（総合：try-with-resources＋suppressed例外＋finallyの横断問題）](#q43)
+- [問題44](#q44)
 
 <a id="q1"></a>
 ## 問題1（1.1 例外の発生：ArrayIndexOutOfBoundsExceptionの基本）
@@ -2143,3 +2144,43 @@ E. `main()`の`catch`で例外を処理した後も、`finally`ブロックは�
 **実施記録**
 
 迷ったところ：なし。A〜E全問正解。ただし手書きのトレースで末尾の`finally`（"done"）を書き漏らしていた点は要注意。
+
+<a id="q44"></a>
+## 問題44
+
+```java
+import java.io.IOException;
+import java.sql.SQLException;
+
+public class Main {
+    public static void main(String[] args) throws SQLException {
+        try {
+            risky();
+        } catch (IOException e) {
+            System.out.println("IO: " + e.getMessage());
+        }
+    }
+
+    static void risky() throws IOException, SQLException {
+        throw new SQLException("sql-fail");
+    }
+}
+```
+
+次のA〜Eのうち、正しい記述をすべて選んでください。
+
+A. `risky()`のように、`throws`にカンマ区切りで複数の例外型を並べて宣言することができる。
+
+B. `risky()`は実際には`SQLException`しか投げていないため、`main()`の`catch (IOException e)`は一度も実行されない。
+
+C. `main()`は`SQLException`をcatchしていないが、`throws SQLException`を宣言しているためコンパイルは通る。
+
+D. このプログラムを実行すると、`SQLException`が`main()`を通じてJVMまで伝播し、プログラムは異常終了する。
+
+E. もし`main()`の`throws SQLException`を削除すると、コンパイルエラーになる。
+
+**実施記録**
+
+回答：A, C, D, E
+正解：A, B, C, D, E
+迷ったポイント：Bを見落とした（risky()が実際にはSQLExceptionしか投げていないため、IOExceptionのcatchは一度も実行されない点）。
