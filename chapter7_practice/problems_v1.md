@@ -908,7 +908,7 @@ E. 何も出力されずに正常終了する
 > ```
 > Throwable
 > ├─ Exception（チェック例外の起点）
-> │   ├─ IOException ── FileNotFoundException
+> │   ├─ IOException ── FileNotFoundException / EOFException
 > │   ├─ ReflectiveOperationException ── ClassNotFoundException
 > │   ├─ SQLException
 > │   └─ RuntimeException（非チェック）
@@ -2240,3 +2240,116 @@ E. もし`Base ref = new Sub();`を`Sub ref = new Sub();`に変更した場合�
 回答：A, B, C, D, E
 正解：A, B, C, D, E
 迷ったポイント：なし。
+
+<a id="q46"></a>
+## 問題46
+
+```java
+import java.io.*;
+
+public class Main {
+    public static void main(String[] args) {
+        try {
+            methodX();
+        } catch (Exception e) {
+            System.out.println("Cause: " + e.getCause());
+        }
+        try {
+            methodY();
+        } catch (Exception e) {
+            System.out.println("Message: " + e.getMessage());
+        }
+    }
+
+    static void methodX() throws Exception {
+        try {
+            throw new EOFException("stream ended");
+        } catch (IOException e) {
+            throw e;
+        }
+    }
+
+    static void methodY() throws IOException {
+        try {
+            throw new EOFException("stream ended");
+        } catch (EOFException e) {
+            System.out.print("logging... ");
+            throw e;
+        }
+    }
+}
+```
+
+このプログラムを実行した時の出力として正しいものを1つ選んでください。
+
+A.
+```
+Cause: stream ended
+logging... Message: null
+```
+
+B.
+```
+Cause: null
+logging... Message: stream ended
+```
+
+C.
+```
+Cause: null
+Message: logging... stream ended
+```
+
+D.
+```
+Cause: java.io.EOFException: stream ended
+logging... Message: stream ended
+```
+
+E.
+コンパイルエラーになる
+
+**実施記録**
+
+回答：D
+正解：B
+迷ったポイント：`getCause()`と`e`自身の型/メッセージを混同した。`throw e;`は既存オブジェクトをそのまま投げ直すだけでnewによるラッピングが起きていないため、`getCause()`は常にnull。
+
+<a id="q47"></a>
+## 問題47
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        try {
+            process();
+        } catch (Exception e) {
+            System.out.println("Cause: " + e.getCause());
+        }
+    }
+
+    static void process() throws Exception {
+        RuntimeException first = new RuntimeException("first");
+        try {
+            throw new IllegalStateException("second");
+        } catch (IllegalStateException second) {
+            RuntimeException third = new RuntimeException("third");
+            throw new Exception("final", first);
+        }
+    }
+}
+```
+
+このプログラムを実行した時の出力として正しいものを1つ選んでください。
+
+A. `Cause: java.lang.RuntimeException: first`
+B. `Cause: java.lang.IllegalStateException: second`
+C. `Cause: java.lang.RuntimeException: third`
+D. `Cause: null`
+E. コンパイルエラーになる
+
+**実施記録**
+
+回答：A
+正解：A
+迷ったポイント：なし。`getCause()`は生成順(直前にnewしたか)ではなく、コンストラクタに明示的に渡した引数で決まる点を確認した。
