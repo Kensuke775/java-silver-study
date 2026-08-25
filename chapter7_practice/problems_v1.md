@@ -935,6 +935,12 @@ E. 何も出力されずに正常終了する
 > - VM系：「VMが死ぬ原因は2つだけ：スタックが溢れる(`StackOverflowError`)か、メモリが尽きる(`OutOfMemoryError`)か」→どちらも`VirtualMachineError`
 >
 > **コツ④：チェック例外は実質5個（＋名前ルール）と組み合わせる** — `Error`系は名前に必ず"Error"が入るので非チェックと判別しやすい。残る"...Exception"のうち、チェック例外なのは`IOException`/`FileNotFoundException`/`ReflectiveOperationException`/`ClassNotFoundException`/`SQLException`（＝IO系・リフレクション系・DB系の3グループのみ）。それ以外の"...Exception"（`RuntimeException`とその子孫、`IllegalStateException`含む）は全部非チェック。
+>
+> **コツ⑤：チェック／非チェックの区別は、オーバーライド時のthrowsルールにも直結する（2026-08-25追記）** — 親クラスのメソッドをオーバーライドするとき、
+> - **チェック例外**（`SQLException`など）→ 親と**同じか、より狭い型（サブクラス）**でしか宣言できない。無関係な型や、より広い型は宣言できない（コンパイルエラー）。宣言自体を無くす（0個にする）のは「狭める」の極端形として常にOK。
+> - **非チェック例外**（`IllegalStateException`など）→ このルールの対象外。親が何を宣言していようと関係なく、オーバーライド側は任意の`RuntimeException`系を自由に宣言できる（`IllegalStateException`が親の例外と無関係でも問題ない）。
+>
+> つまり「チェックか非チェックか」の区別は、catch/throwsの伝播ルールだけでなく、オーバーライド時の制約の有無にも同じ軸で効いてくる。
 
 <a id="q24"></a>
 ## 問題24（2.3 multi-catchの総合ドリル：兄弟OK／再代入不可／継承関係NG、5択複数選択）
