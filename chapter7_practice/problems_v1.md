@@ -2353,3 +2353,102 @@ E. コンパイルエラーになる
 回答：A
 正解：A
 迷ったポイント：なし。`getCause()`は生成順(直前にnewしたか)ではなく、コンストラクタに明示的に渡した引数で決まる点を確認した。
+
+<a id="q48"></a>
+## 問題48
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        int[] arr = {1, 2, 3};
+        try {
+            System.out.println(arr[5]);
+        } catch ( /* insert code here */ ) {
+            System.out.println("exception");
+        }
+    }
+}
+```
+
+`exception`と出力するには、catchに何を入れるか。当てはまるものをすべて選んでください。
+
+A. `ArrayIndexOutOfBoundsException e`
+B. `IndexOutOfBoundsException e`
+C. `NullPointerException e`
+D. `RuntimeException e`
+E. `NumberFormatException e`
+
+**実施記録**
+
+回答：A, B, D
+正解：A, B, D
+迷ったポイント：なし。
+
+<a id="q49"></a>
+## 問題49
+
+```java
+class DataException extends RuntimeException {}
+class ParseDataException extends DataException {}
+class SaveDataException extends DataException {}
+
+public class Main {
+    public static void main(String[] args) {
+        try {
+            throw new ParseDataException();
+        } catch ( /* insert code here */ ) {
+            System.out.println("caught");
+        }
+    }
+}
+```
+
+`caught`と出力するには、catchに何を入れるか。当てはまるものをすべて選んでください。
+
+A. `ParseDataException e`
+B. `DataException e`
+C. `SaveDataException e`
+D. `RuntimeException e`
+E. `Exception e`
+
+**実施記録**
+
+回答：A, D, E
+正解：A, B, D, E
+迷ったポイント：Bを見落とした(DataExceptionがParseDataExceptionの直接の親であることに気づかなかった)。
+
+<a id="q50"></a>
+## 問題50
+
+```java
+class DataException extends RuntimeException {}
+class ParseDataException extends DataException {}
+
+public class Main {
+    public static void main(String[] args) {
+        try {
+            throw new ParseDataException();
+        } catch (ParseDataException e) {
+            System.out.println("A");
+        } catch (DataException e) {
+            System.out.println("B");
+        } catch (RuntimeException e) {
+            System.out.println("C");
+        }
+    }
+}
+```
+
+実行結果として正しいものを1つ選んでください。
+
+A. `A`
+B. `B`
+C. `C`
+D. コンパイルエラーが発生する
+E. 何も出力されずに異常終了する
+
+**実施記録**
+
+回答：A
+正解：A
+迷ったポイント：なし。catch順序(サブクラスが先、スーパークラスが後)が正しいことを確認済み。
