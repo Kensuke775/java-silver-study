@@ -42,6 +42,7 @@
 - [問題40（4.1 throws：チェック例外のcatch-or-specify、呼び出しチェーン3段構成）](#q40)
 - [問題41（4.1 throws：例外の変換＝チェック例外をcatchして別の非チェック例外にラップして投げ直すパターン）](#q41)
 - [問題42（4.1 throws：3段の呼び出しチェーン＋型が合わないcatchが途中に紛れ込むパターン）](#q42)
+- [問題43（総合：try-with-resources＋suppressed例外＋finallyの横断問題）](#q43)
 
 <a id="q1"></a>
 ## 問題1（1.1 例外の発生：ArrayIndexOutOfBoundsExceptionの基本）
@@ -2072,3 +2073,67 @@ E. `main()`の`catch (IOException e)`を`catch (Exception e)`に変えても、�
 **実施記録**
 
 迷ったところ：B, C, D, Eは正解したが、Aを見落とした（`level1()`・`level2()`それぞれ個別にthrowsが必要という点への意識が薄かった）。
+
+<a id="q43"></a>
+## 問題43（総合：try-with-resources＋suppressed例外＋finallyの横断問題）
+
+```java
+public class Main {
+    static class Resource implements AutoCloseable {
+        String name;
+        Resource(String name) {
+            this.name = name;
+            System.out.print("open:" + name + " ");
+        }
+        @Override
+        public void close() {
+            System.out.print("close:" + name + " ");
+            throw new IllegalStateException("close-fail:" + name);
+        }
+    }
+
+    public static void main(String[] args) {
+        try {
+            process();
+        } catch (RuntimeException e) {
+            System.out.print("caught:" + e.getMessage() + " ");
+            for (Throwable sup : e.getSuppressed()) {
+                System.out.print("suppressed:" + sup.getMessage() + " ");
+            }
+        } finally {
+            System.out.println("done");
+        }
+    }
+
+    static void process() {
+        try (Resource r1 = new Resource("R1"); Resource r2 = new Resource("R2")) {
+            throw new RuntimeException("body-fail");
+        }
+    }
+}
+```
+
+次のA〜Eのうち、正しい記述をすべて選んでください。
+
+A. `process()`は`RuntimeException`しか投げていないため、`throws`宣言は不要であり、実際に付いていなくてもコンパイルは通る。
+
+B. リソースは`r1`→`r2`の順にオープンされ、close()は逆順（`r2`→`r1`）で呼ばれる。
+
+C. `close()`が投げる`IllegalStateException`は、tryブロック本体で発生した`RuntimeException`（`"body-fail"`）に対する**抑制された例外（suppressed exception）**として扱われ、`main()`側でcatchされる例外自体は`"body-fail"`の方である。
+
+D. `e.getSuppressed()`で取得できる配列の順序は、close()が呼ばれた順（`r2`→`r1`）と一致する。
+
+E. `main()`の`catch`で例外を処理した後も、`finally`ブロックは実行されるため、最終的に`"done"`という出力が必ず末尾に来る。
+
+**解答**
+
+正解：**A, B, C, D, E**（全部正しい）
+
+**補足**
+
+- 実際の出力は`open:R1 open:R2 close:R2 close:R1 caught:body-fail suppressed:close-fail:R2 suppressed:close-fail:R1 done`（javacで検証済み）。`finally`は`catch`の後に必ず実行されるため、`done`は改行付きで一番最後に来る。
+- 今まで別々に扱ってきた「try-with-resourcesのclose順」「suppressed例外」「finally」「throwsの要不要（非チェック例外なら省略可）」を1つのコードに統合した総合問題だった。
+
+**実施記録**
+
+迷ったところ：なし。A〜E全問正解。ただし手書きのトレースで末尾の`finally`（"done"）を書き漏らしていた点は要注意。
