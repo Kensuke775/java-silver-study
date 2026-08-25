@@ -868,6 +868,7 @@ E. 何も出力されずに正常終了する
 > | `IOException` | チェック | ファイルやネットワークなど、入出力（I/O）処理が失敗したときに発生。「Input/Output Exception」の略。 |
 > | `FileNotFoundException` | チェック（`IOException`のサブクラス） | 指定したパスにファイルが存在しないときに発生。ファイルを開こうとして「そもそも無い」場合。 |
 > | `ClassNotFoundException` | チェック | 文字列で指定したクラス名（`Class.forName("...")`など）で、該当するクラスをロードできないときに発生。 |
+> | `SQLException` | チェック（`Exception`の直接のサブクラス、`java.sql`パッケージ） | データベースへのアクセス（JDBC経由のSQL実行など）が失敗したときに発生。`IOException`とは別系統の兄弟。 |
 >
 > ### 非チェック例外（RuntimeException系）
 >
@@ -878,6 +879,7 @@ E. 何も出力されずに正常終了する
 > | `ClassCastException` | 参照型のキャストが無効なとき（実際の型と互換性のない型へキャストしようとしたとき）に発生。 |
 > | `NumberFormatException` | 文字列を数値に変換できないときに発生（例：`Integer.parseInt("abc")`）。 |
 > | `ArithmeticException` | 整数をゼロで割った場合など、算術的に不正な演算をしたときに発生（`10 / 0`。`10.0 / 0`は例外にならず`Infinity`になる点に注意）。 |
+> | `IllegalStateException` | `RuntimeException`の直接のサブクラス。オブジェクトやメソッドが、今の状態では呼び出せない操作を呼ばれたときに発生（引数の値自体は正しいが、タイミング・状態が不正な場合。値そのものが不正な`IllegalArgumentException`とは区別される）。 |
 >
 > ### Error系（非チェック）
 >
@@ -906,10 +908,12 @@ E. 何も出力されずに正常終了する
 > ├─ Exception（チェック例外の起点）
 > │   ├─ IOException ── FileNotFoundException
 > │   ├─ ReflectiveOperationException ── ClassNotFoundException
+> │   ├─ SQLException
 > │   └─ RuntimeException（非チェック）
 > │       ├─ ArithmeticException
 > │       ├─ ClassCastException
 > │       ├─ NullPointerException
+> │       ├─ IllegalStateException
 > │       ├─ IndexOutOfBoundsException ── ArrayIndexOutOfBoundsException
 > │       └─ IllegalArgumentException ── NumberFormatException
 > └─ Error（非チェック）
@@ -917,17 +921,19 @@ E. 何も出力されずに正常終了する
 >     └─ VirtualMachineError ── StackOverflowError / OutOfMemoryError
 > ```
 >
-> **コツ①：途中で分岐する「hub」は6個だけ** — `IOException` / `ReflectiveOperationException` / `IndexOutOfBoundsException` / `IllegalArgumentException` / `LinkageError` / `VirtualMachineError`。これさえ覚えれば残りは全部この6個か`RuntimeException`/`Error`に直結する末端。
+> **コツ①：途中で分岐する「hub」は6個だけ** — `IOException` / `ReflectiveOperationException` / `IndexOutOfBoundsException` / `IllegalArgumentException` / `LinkageError` / `VirtualMachineError`。これさえ覚えれば残りは全部この6個か`RuntimeException`/`Error`に直結する末端。`SQLException`と`IllegalStateException`はどちらも自身はさらに枝分かれしない末端（hubではない）。
 >
 > **コツ②：末端の名前は親の意味をそのまま含んでいることが多い** — `ArrayIndexOutOfBoundsException`は名前に"IndexOutOfBounds"が入っているので親が分かる。`NoClassDefFoundError`は「クラス定義が見つからない」＝リンクの失敗→`LinkageError`。
 >
 > **コツ③：意味でグループ化して短文にする**
 > - IO系：「ファイルが見つからない(`FileNotFoundException`)のはIOの話」
 > - リフレクション系：「クラスが見つからない(`ClassNotFoundException`)のはリフレクションの話」（`Class.forName("文字列")`でクラス名を実行時に探す動作。文字列なのでコンパイル時にチェックできず、失敗しうるからチェック例外）
+> - DB系：「SQL実行の失敗(`SQLException`)はJDBC（DB接続）の話」。`IOException`と名前は似ているが継承関係は無い、独立した兄弟。
 > - 引数系：「数値の書式がおかしい(`NumberFormatException`)＝不正な引数(`IllegalArgumentException`)の一種」
+> - 状態系：「引数の値自体は正しいのに、今のタイミング・状態では呼べない(`IllegalStateException`)」＝`IllegalArgumentException`（値が悪い）とは原因が違う、`RuntimeException`直下の別枝。
 > - VM系：「VMが死ぬ原因は2つだけ：スタックが溢れる(`StackOverflowError`)か、メモリが尽きる(`OutOfMemoryError`)か」→どちらも`VirtualMachineError`
 >
-> **コツ④：チェック例外は実質4個（＋名前ルール）と組み合わせる** — `Error`系は名前に必ず"Error"が入るので非チェックと判別しやすい。残る"...Exception"のうち、チェック例外なのは`IOException`/`FileNotFoundException`/`ReflectiveOperationException`/`ClassNotFoundException`（＝IO系とリフレクション系の2ペアのみ）。それ以外の"...Exception"（`RuntimeException`とその子孫）は全部非チェック。
+> **コツ④：チェック例外は実質5個（＋名前ルール）と組み合わせる** — `Error`系は名前に必ず"Error"が入るので非チェックと判別しやすい。残る"...Exception"のうち、チェック例外なのは`IOException`/`FileNotFoundException`/`ReflectiveOperationException`/`ClassNotFoundException`/`SQLException`（＝IO系・リフレクション系・DB系の3グループのみ）。それ以外の"...Exception"（`RuntimeException`とその子孫、`IllegalStateException`含む）は全部非チェック。
 
 <a id="q24"></a>
 ## 問題24（2.3 multi-catchの総合ドリル：兄弟OK／再代入不可／継承関係NG、5択複数選択）
