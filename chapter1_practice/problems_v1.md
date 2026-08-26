@@ -15,6 +15,8 @@
 - [問題11](#q11)
 - [問題12](#q12)
 - [問題13](#q13)
+- [問題14](#q14)
+- [問題15](#q15)
 - [参考：javadocの使い方](#ref-javadoc)
 
 <a id="q1"></a>
@@ -26,7 +28,7 @@
 - 現在の仕様策定はOracle単独ではなく、JCP（Java Community Process）というコミュニティが行っている
 - 「プログラミング言語としてのJava」と「プラットフォームとしてのJava」の2つの側面がある
 - 実行環境はJVMが提供する
-- 仕様はJava SE／Java EE／Java MEの3エディション
+- 仕様はJava SE／Java EE／Java MEの3エディション（※Java EEは2017年にOracleからEclipse Foundationへ移管され、現在は「Jakarta EE」という名称になっている）
 
 以下の説明のうち、正しいものはどれですか。（3つ選択）
 
@@ -111,16 +113,17 @@ F. 「バイトコード」という名称は、JVMの命令が2バイト単位�
 - JRE（Java Runtime Environment）＝ JVM ＋ クラスライブラリ
 - JDK（Java SE Development Kit）＝ JRE ＋ 開発用ツール（javac, java等）
 - 包含関係：JDK ⊃ JRE ⊃ JVM
-- Oracle社が提供する2つのJDK：Oracle JDK（ライセンス: Oracle No-Fee Terms and Conditions、個人利用無料）／OpenJDK（Oracleビルド、ライセンス: GNU GPL v2.0）
+- OpenJDKはOracle社単独のものではなく、複数ベンダー（Eclipse Adoptium、Amazon Corretto等）がビルドを配布するオープンソースプロジェクト
+- Oracle社は自社ビルドとして2種類を提供：Oracle JDK（ライセンス: Oracle No-Fee Terms and Conditions、個人利用無料）／Oracle OpenJDKビルド（ライセンス: GNU GPL v2.0）
 
 以下の説明のうち、正しいものはどれですか。（3つ選択）
 
 A. JRE（Java Runtime Environment）は、JVMとクラスライブラリで構成される
 B. JDK（Java SE Development Kit）は、JVMのみで構成され、クラスライブラリは含まれない
 C. JDKはJREを包含し、JREはJVMを包含するという関係になっている（JDK ⊃ JRE ⊃ JVM）
-D. Oracle社が提供するJDKには、Oracle JDKとOpenJDKの2種類がある
+D. Oracle社は、Oracle JDKとOpenJDK（Oracleによるビルド）という2種類のJDKビルドを提供している
 E. Oracle JDKはGNU GPL v2.0ライセンスで提供されており、個人利用は有料である
-F. OpenJDKは「Oracle No-Fee Terms and Conditions」ライセンスで提供されており、個人利用は無料である
+F. OpenJDKは「Oracle No-Fee Terms and Conditions」ライセンスで提供されており、個人利用は有料である
 
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 
@@ -166,7 +169,7 @@ E. `java File.java`（ソースファイルモード）は、実行のたびに�
 
 **要点**
 
-- `main`メソッドは実行に必須。宣言は`public static void main(String[] args) {}`の形に固定
+- `main`メソッドは実行に必須。宣言は`public static void main(String[] args) {}`の形に固定（※Java 21でプレビュー導入、Java 25〔LTS、2025年9月〕で正式機能化された「暗黙クラス／インスタンスmainメソッド」により`void main() { ... }`という簡略記法も現在は可能。ただしJava Silver試験の主対象は従来形式）
   - `public`・`static`は修飾子、`void`は戻り値なしを示す型指定
   - `args`という引数名自体は決まりではなく慣習（自由に変更可）。`String... args`という可変長引数の書き方も可
 - 文（statement）の末尾は`;`が必須。`{ }`で囲まれた範囲が**ブロック**
@@ -413,6 +416,83 @@ E. `java Sample`を実行すると、`Main`クラスのmainメソッドが優先
 
 回答：A, B, C, D
 正解：A, B, C, D
+迷ったポイント：なし
+
+---
+
+<a id="q14"></a>
+## 問題14
+
+**要点**
+
+- 別パッケージのクラス（クラスに限らず、インタフェースなど型全般）を使うには、①import宣言　②使用のたびに完全修飾名を書く、のどちらかが必要
+- 同じパッケージ内のクラス同士はimport不要
+- import宣言はソースファイルの先頭に書く。package宣言がある場合はその後
+- ワイルドカード`import パッケージ名.*;`は、そのパッケージ**直下**の型だけをまとめてインポートする。サブパッケージは別パッケージ扱いなので対象外
+- importの対象はクラスだけでなくインタフェース等の型全般。ただしimportは「名前解決の省略」に過ぎず、アクセス制御（public/private）には一切関与しない
+
+次のパッケージ構造と4つのimport宣言（教科書の図1-8に対応）について、正しい説明はどれですか。（4つ選択）
+
+```
+java
+ └── util
+      ├── ArrayList.class
+      │
+      └── function
+           └── Predicate.class
+```
+
+```java
+① import java.util.ArrayList;
+② import java.util.*;
+③ import java.util.function.Predicate;
+④ import java.util.*.*;
+```
+
+A. `import java.util.*;`と書けば、`java.util.function.Predicate`もクラス名だけで使用できるようになる
+B. パッケージ全体をインポートする場合は、クラス名の部分を`*`にする（パッケージ名の部分を`*`にすることはできない）
+C. `import java.util.*.*;`は、`java.util`とそのサブパッケージ`java.util.function`の両方に所属するクラスをまとめてインポートする、有効な記述である
+D. `import java.util.ArrayList;`は、`ArrayList`クラス1つをインポートする宣言である
+E. `import java.util.function.Predicate;`は、`Predicate`インタフェースをインポートする宣言である
+F. `import java.util.*;`は、`java.util`パッケージに直接所属するクラスをすべてインポートするが、サブパッケージである`java.util.function`のクラスはインポートされない
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+**実施記録**
+
+回答（1回目）：B, C, D, F
+回答（2回目）：B, D, E, F
+正解：B, D, E, F
+迷ったポイント：1回目はCを誤って選択（`import java.util.*.*;`は実際にはコンパイルエラーになるNGな記述で、「有効な記述である」という説明自体が誤り）、かつEを見落とした（importの対象はクラスだけでなくインタフェースも含まれることを知らず、`Predicate`インタフェースのインポート記述を疑ってしまった）。2回目で正解。あわせて「importは名前解決の省略であり、アクセス制御には関与しない」という点も確認。
+
+---
+
+<a id="q15"></a>
+## 問題15
+
+**要点**
+
+- 標準API（クラスライブラリ）＝Javaが用意する実行可能な部品。数が膨大なため目的別にパッケージで整理されている（表1-1）
+- `java.lang`：String, Integer, Math, Object などJava言語の基本クラス。**利用頻度が高いためimport不要**でクラス名だけで使える
+- `java.io`：PrintStream, Writer, Reader などファイル等のデータ入出力機能
+- `java.util`：*List*, *Set*, *Map*（インタフェース）＋ ArrayList（クラス）などコレクションフレームワーク
+- `java.util.function`：*Function*, *Consumer*, *Predicate*, *Supplier*（すべてインタフェース）＝ラムダ式の型となる関数型インタフェース
+
+以下の説明のうち、正しいものはどれですか。（4つ選択）
+
+A. `java.lang`パッケージに属するクラスは、利用頻度が高いため、import宣言をしなくてもクラス名だけで使用できる
+B. `java.lang`以外の標準APIパッケージも、import宣言をしなくても常にクラス名だけで使用できる
+C. `java.util.function`パッケージに属する`Function`・`Consumer`・`Predicate`・`Supplier`は、いずれもインタフェースであり、ラムダ式の型として使われる
+D. `ArrayList`は、`java.util`パッケージに属するインタフェースである
+E. `java.util`パッケージには、`List`・`Set`・`Map`といったインタフェースと、`ArrayList`というクラスの両方が含まれている
+F. `java.io`パッケージは、ファイルなどへのデータの入出力機能を提供するパッケージである
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+**実施記録**
+
+回答：A, C, E, F
+正解：A, C, E, F
 迷ったポイント：なし
 
 ---
