@@ -61,3 +61,22 @@ import com.a.Sample;
 ```
 
 ルールは4つ：①package宣言とimport宣言が両方ある場合はpackage宣言が先　②`*`はimportの**末尾のクラス名部分のみ**省略可能（サブパッケージ部分の省略や、package宣言自体でのワイルドカードは不可）　③package宣言は1ファイルに1つのみ　④import宣言は1ファイルに複数指定してよい（特定クラスのimportとワイルドカードimportの混在もOK）。
+
+---
+
+<a id="pitfall-sourcefile-mode-filename-exception-is-not-javac"></a>
+## 4. 「ファイル名とpublicクラス名の不一致OK」は、ソースファイルモード限定の特例——javacでは常にNG
+
+問題9（2周目オリジナル）より。
+
+```bash
+# Different.java の中身は public class Actual { ... }（ファイル名と不一致）
+
+java Different.java
+# → 成功："Actual runs" と出力される（ソースファイルモードだから許容される）
+
+javac Different.java
+# → 失敗：エラー: クラス Actualはpublicであり、ファイルActual.javaで宣言する必要があります
+```
+
+同じ「ファイル名とpublicクラス名の不一致」というコードに対して、実行方法によって結果が変わる。**ソースファイルモード（`java File.java`）だけがこの不一致を許容する特例**で、通常の`javac`によるコンパイルではこの不一致は常にコンパイルエラーになる。「不一致がOKなケースがある」という事実だけを覚えていて、それが**どちらのモード限定の話か**を取り違えると逆の結論を選んでしまう——「javacでも許容される」と誤答しやすい典型パターン。
