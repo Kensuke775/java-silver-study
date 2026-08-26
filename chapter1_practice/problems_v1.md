@@ -5,6 +5,10 @@
 - [問題1](#q1)
 - [問題2](#q2)
 - [問題3](#q3)
+- [問題4](#q4)
+- [問題5](#q5)
+- [問題6](#q6)
+- [参考：javadocの使い方](#ref-javadoc)
 
 <a id="q1"></a>
 ## 問題1
@@ -89,3 +93,134 @@ F. 「バイトコード」という名称は、JVMの命令が2バイト単位�
 回答：B, C, E
 正解：B, C, E
 迷ったポイント：なし
+
+---
+
+<a id="q4"></a>
+## 問題4
+
+**要点**
+
+- JRE（Java Runtime Environment）＝ JVM ＋ クラスライブラリ
+- JDK（Java SE Development Kit）＝ JRE ＋ 開発用ツール（javac, java等）
+- 包含関係：JDK ⊃ JRE ⊃ JVM
+- Oracle社が提供する2つのJDK：Oracle JDK（ライセンス: Oracle No-Fee Terms and Conditions、個人利用無料）／OpenJDK（Oracleビルド、ライセンス: GNU GPL v2.0）
+
+以下の説明のうち、正しいものはどれですか。（3つ選択）
+
+A. JRE（Java Runtime Environment）は、JVMとクラスライブラリで構成される
+B. JDK（Java SE Development Kit）は、JVMのみで構成され、クラスライブラリは含まれない
+C. JDKはJREを包含し、JREはJVMを包含するという関係になっている（JDK ⊃ JRE ⊃ JVM）
+D. Oracle社が提供するJDKには、Oracle JDKとOpenJDKの2種類がある
+E. Oracle JDKはGNU GPL v2.0ライセンスで提供されており、個人利用は有料である
+F. OpenJDKは「Oracle No-Fee Terms and Conditions」ライセンスで提供されており、個人利用は無料である
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+**実施記録**
+
+回答：A, C, D
+正解：A, C, D
+迷ったポイント：なし
+
+---
+
+<a id="q5"></a>
+## 問題5
+
+**要点**
+
+- `javac`（java + compiler）：`.java`（ソース）→`.class`（バイトコード）に変換するコンパイラ
+- `java`：コンパイル済みの`.class`をJVM上で実行するコマンド
+- `javac`と`java`は別コマンド（javacがjavaを内部で呼んでいる、という関係ではない）
+- 重要な認識：`java ClassName`（通常実行）は、ディスク上の既存の`.class`をそのまま実行するだけで、ソース（`.java`）は一切見ない。ソースを編集しても、再度`javac`でコンパイルしない限り実行結果には反映されない
+- 対照的に`java File.java`（ソースファイルモード）は、実行のたびにメモリ上でコンパイルし直すので、ソースの変更が毎回反映される
+
+以下の説明のうち、正しいものはどれですか。（3つ選択）
+
+A. `javac`は`.java`ファイルを`.class`ファイル（バイトコード）に変換するコンパイラである
+B. `javac`は`java`コマンドの一種であり、内部的に`java`を呼び出している
+C. `java ClassName`（通常実行）は、ディスク上に存在する既存の`.class`ファイルをそのまま実行するだけで、ソースファイル（`.java`）の内容は一切参照しない
+D. ソースファイルを編集した後、再度`javac`でコンパイルしなくても、`java ClassName`を実行すれば編集内容がそのまま反映される
+E. `java File.java`（ソースファイルモード）は、実行のたびにその場でメモリ上にコンパイルするため、ソースの変更が毎回反映される
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+**実施記録**
+
+回答：A, C, E
+正解：A, C, E
+迷ったポイント：なし
+
+---
+
+<a id="q6"></a>
+## 問題6
+
+**要点**
+
+- `main`メソッドは実行に必須。宣言は`public static void main(String[] args) {}`の形に固定
+  - `public`・`static`は修飾子、`void`は戻り値なしを示す型指定
+  - `args`という引数名自体は決まりではなく慣習（自由に変更可）。`String... args`という可変長引数の書き方も可
+- 文（statement）の末尾は`;`が必須。`{ }`で囲まれた範囲が**ブロック**
+- コメントは`//`（1行）と`/* */`（複数行）の2種類。コンパイル後の`.class`には含まれない
+- `/** */`は**ドキュメンテーションコメント**（`javadoc`コマンドでHTML化できる）
+
+以下の説明のうち、正しいものはどれですか。（3つ選択）
+
+A. 1行コメント（`//`）や複数行コメント（`/* */`）は、コンパイル後の`.class`ファイルには一切含まれない
+B. `/** */`で書かれたコメントは、`javadoc`コマンドによってHTML形式のドキュメントに変換できる
+C. Javaの文（statement）は、末尾に`;`を付けなくてもコンパイルが成功する
+D. `{ }`で囲まれた範囲のことを「ブロック」と呼ぶ
+E. mainメソッドの引数名は必ず`args`という名前にしなければならず、他の名前に変更するとコンパイルエラーになる
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+**実施記録**
+
+回答：A, B, D
+正解：A, B, D
+迷ったポイント：なし
+
+---
+
+<a id="ref-javadoc"></a>
+## 参考：javadocの使い方
+
+問題6の`/** */`（ドキュメンテーションコメント）に関連して、実際に`sample/chap7/ex14/Main.java`で`javadoc`コマンドを実演確認した内容。
+
+**何のためのものか**：javadocは「自分が今すぐ何かを調べるため」のコマンドではなく、**コードに書いた説明を、後で他の人（や未来の自分）が調べられる形（HTML）に変換して公開するため**のツール。流れは3ステップ：
+
+1. コードを書いた人が、クラス/メソッドの直前に`/** */`で説明・`@param`・`@return`などを書いておく
+2. `javadoc`コマンドを実行してHTMLに変換する（＝生成する人がやる作業はここまで）
+3. **そのコードを使う別の人**が、生成されたHTMLを見て調べる（＝実際に「調べる」のはこの人）
+
+普段目にする`String`や`ArrayList`などの公式Java APIドキュメントも、JDKのソース自体に書かれた`/** */`コメントを、Oracleが同じ`javadoc`コマンドでビルドして公開しているもの——公式ドキュメントと同じ仕組みで生成される。
+
+**実行コマンド**
+
+```bash
+cd <対象の.javaがあるディレクトリ>
+javadoc -d html Main.java
+```
+
+- `-d html`：出力先ディレクトリを指定（省略すると実行したディレクトリ直下に大量のHTMLファイルが直接生成される）
+- 実行すると`html/`ディレクトリの中に`Main.html`・`index.html`等が生成される
+- `open html/Main.html`（Mac）でブラウザ表示して確認できる
+
+**対応関係の実例**（`sample/chap7/ex14/Main.java`の`add`メソッドで確認済み）
+
+```java
+/**
+ * 2つの整数を加算する。
+ *
+ * @param a 加算する1つ目の整数
+ * @param b 加算する2つ目の整数
+ * @return aとbの合計値
+ */
+public int add(int a, int b) {
+    return a + b;
+}
+```
+
+上記から生成されたHTMLは、`@param`が「パラメータ：」セクション、`@return`が「戻り値：」セクションにそのまま変換される。通常の`//`・`/* */`コメントは`javadoc`の対象外（`.class`に含まれないのと同様、HTML化もされない）。
