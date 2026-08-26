@@ -2452,3 +2452,1069 @@ E. 何も出力されずに異常終了する
 回答：A
 正解：A
 迷ったポイント：なし。catch順序(サブクラスが先、スーパークラスが後)が正しいことを確認済み。
+
+<a id="q51"></a>
+## 問題51
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        int total = 0;
+        try {
+            int divisor = 0;
+            total = 100 / divisor;
+        } catch (ArithmeticException e) {
+            System.out.println(e.getMessage() + ":" + total + ":" + divisor);
+        }
+    }
+}
+```
+
+コンパイル、実行するとどのような結果になりますか。（1つ選択）
+
+A. `/ by zero:0:0` が出力される
+B. `0:0` が出力される
+C. `/ by zero` が出力される
+D. `java.lang.ArithmeticException: / by zero:0:0` が出力される
+E. コンパイルエラーが発生する
+
+**実施記録**
+
+回答：E
+正解：E
+迷ったポイント：なし。原因は`divisor`(try内で宣言)のみ。`total`はtry外で宣言されているためアクセス自体は問題ない点も理解済み。
+
+<a id="q52"></a>
+## 問題52
+
+```java
+import java.io.IOException;
+
+public class Main {
+    public static void main(String[] args) {
+        try {
+            int x = Integer.parseInt("abc");
+            work();
+        /* insert code here */
+    }
+    static void work() throws IOException {
+        throw new IOException("boom");
+    }
+}
+```
+
+コンパイルを成功させるには、6行目に何を挿入するか。当てはまるものをすべて選んでください。
+
+A. `} catch (Exception e) {}`
+B. `} catch (NumberFormatException | Exception e) {}`
+C. `} catch (RuntimeException | IOException e) {}`
+D. `} catch (NumberFormatException e | IOException e) {}`
+E. `} catch (IOException | NumberFormatException e) {}`
+
+**実施記録**
+
+回答：A, E
+正解：A, C, E
+迷ったポイント：Cを見落とした(RuntimeExceptionとIOExceptionが継承関係の無い兄弟であるため、multi-catchとして有効である点)。
+
+<a id="q53"></a>
+## 問題53
+
+```java
+import java.sql.SQLException;
+
+public class Main {
+    public static void main(String[] args) {
+        try {
+            Object obj = "text";
+            Integer n = (Integer) obj;
+            query();
+        /* insert code here */
+    }
+    static void query() throws SQLException {
+        throw new SQLException("query failed");
+    }
+}
+```
+
+コンパイルを成功させるには、6行目に何を挿入するか。当てはまるものをすべて選んでください。
+
+A. `} catch (Exception e) {}`
+B. `} catch (ClassCastException | RuntimeException e) {}`
+C. `} catch (ClassCastException | SQLException e) {}`
+D. `} catch (ClassCastException e | SQLException e) {}`
+E. `} catch (RuntimeException | SQLException e) {}`
+
+**実施記録**
+
+回答：A, C, E
+正解：A, C, E
+迷ったポイント：なし。問題52の弱点(継承関係チェック、単一変数構文)を克服できた。
+
+<a id="q54"></a>
+## 問題54
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        try (Logger logger = new Logger()) {
+            System.out.print("X");
+        } finally {
+            System.out.print("Y");
+        }
+    }
+}
+class Logger implements AutoCloseable {
+    public Logger() {
+        System.out.print("Open");
+    }
+    public void close() {
+        System.out.print("Close");
+    }
+}
+```
+
+コンパイル、実行するとどのような結果になりますか。（1つ選択）
+
+A. `OpenXCloseY` が出力される
+B. `OpenXYClose` が出力される
+C. `XOpenCloseY` が出力される
+D. `OpenCloseXY` が出力される
+E. コンパイルエラーが発生する
+
+**実施記録**
+
+回答：C
+正解：A
+迷ったポイント：リソースの生成(コンストラクタ)がtry本体の実行より先に走る点を逆に捉えていた(本体が先に動くと誤解)。
+
+<a id="q55"></a>
+## 問題55
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        try (Logger logger = new Logger()) {
+            System.out.print("X");
+            throw new RuntimeException("fail");
+        } catch (RuntimeException e) {
+            System.out.print("Catch");
+        } finally {
+            System.out.print("Y");
+        }
+    }
+}
+class Logger implements AutoCloseable {
+    public Logger() { System.out.print("Open"); }
+    public void close() { System.out.print("Close"); }
+}
+```
+
+実行結果として正しいものを1つ選んでください。
+
+A. `OpenXCatchCloseY`
+B. `OpenXCloseCatchY`
+C. `OpenXCatchYClose`
+D. `OpenCloseXCatchY`
+E. コンパイルエラーが発生する
+
+**実施記録**
+
+回答：B
+正解：B
+迷ったポイント：なし。close()がcatchより先に実行される点を正しく把握できている。
+
+<a id="q56"></a>
+## 問題56
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        try (Logger a = new Logger("A"); Logger b = new Logger("B")) {
+            System.out.print("Body");
+        }
+    }
+}
+class Logger implements AutoCloseable {
+    String name;
+    Logger(String name) { this.name = name; System.out.print("Open" + name); }
+    public void close() { System.out.print("Close" + name); }
+}
+```
+
+実行結果として正しいものを1つ選んでください。
+
+A. `OpenAOpenBBodyCloseACloseB`
+B. `OpenAOpenBBodyCloseBCloseA`
+C. `OpenBOpenABodyCloseACloseB`
+D. `OpenAOpenBCloseBCloseABody`
+E. コンパイルエラーが発生する
+
+**実施記録**
+
+回答：E
+正解：B
+迷ったポイント：複数リソースを`;`区切りで宣言する構文自体は正式にサポートされている点を見落とし、コンパイルエラーと誤判断した。開く順=宣言順、閉じる順=その逆、という基本パターン。
+
+<a id="q57"></a>
+## 問題57
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        try (Logger a = new Logger("A"); Logger b = new Logger("B", true)) {
+            System.out.print("Body");
+        } catch (RuntimeException e) {
+            System.out.print("Caught:" + e.getMessage());
+        }
+    }
+}
+class Logger implements AutoCloseable {
+    String name;
+    Logger(String name) { this.name = name; System.out.print("Open" + name); }
+    Logger(String name, boolean fail) {
+        this.name = name;
+        if (fail) throw new RuntimeException("init-fail-" + name);
+        System.out.print("Open" + name);
+    }
+    public void close() { System.out.print("Close" + name); }
+}
+```
+
+実行結果として正しいものを1つ選んでください。
+
+A. `OpenACaught:init-fail-B`
+B. `OpenACloseACaught:init-fail-B`
+C. `OpenAOpenBCaught:init-fail-B`
+D. `Caught:init-fail-B`
+E. コンパイルエラーが発生する
+
+**実施記録**
+
+回答：B
+正解：B
+迷ったポイント：なし。既に開いたAだけがcloseされ、開けなかったBはcloseされない点を正しく把握できている。
+
+<a id="q58"></a>
+## 問題58
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        try {
+            int x = 10 / 2;
+            System.out.print("X");
+        } finally {
+            System.out.print("Y");
+        }
+    }
+}
+```
+
+コンパイル、実行するとどのような結果になりますか。（1つ選択）
+
+A. `X` が出力される
+B. `XY` が出力される
+C. `Y` が出力される
+D. `YX` が出力される
+E. コンパイルエラーが発生する
+
+**実施記録**
+
+回答：B
+正解：B
+迷ったポイント：なし。catch無し、finallyのみでも有効な組み合わせであることを正しく把握。
+
+<a id="q59"></a>
+## 問題59
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        try {
+            System.out.print("X");
+        }
+    }
+}
+```
+
+コンパイル、実行するとどのような結果になりますか。（1つ選択）
+
+A. `X` が出力される
+B. 何も出力されない
+C. 実行時にエラーが発生する
+D. コンパイルエラーが発生する
+E. 無限ループになる
+
+**実施記録**
+
+回答：D
+正解：D
+迷ったポイント：なし。catch・finally・リソース宣言のいずれも無いtry単体は無効、という基本形を正しく把握。
+
+<a id="q60"></a>
+## 問題60
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        try (Counter c = new Counter()) {
+            System.out.print("X");
+        }
+    }
+}
+class Counter implements AutoCloseable {
+    public Counter() { System.out.print("Open"); }
+    public void close() { System.out.print("Close"); }
+}
+```
+
+コンパイル、実行するとどのような結果になりますか。（1つ選択）
+
+A. `OpenXClose` が出力される
+B. `XOpenClose` が出力される
+C. `OpenCloseX` が出力される
+D. `X` だけが出力される
+E. コンパイルエラーが発生する
+
+**実施記録**
+
+回答：C
+正解：A
+迷ったポイント：closeのタイミングを本体実行の前と誤解した。正しくは「開く→本体→閉じる」の順で、closeは常に本体が終わった後。
+
+<a id="q61"></a>
+## 問題61
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        try (Box box = new Box()) {
+            System.out.print("Use1");
+            System.out.print("Use2");
+        }
+    }
+}
+class Box implements AutoCloseable {
+    public Box() { System.out.print("Make"); }
+    public void close() { System.out.print("Discard"); }
+}
+```
+
+実行結果として正しいものを1つ選んでください。
+
+A. `MakeUse1Use2Discard`
+B. `MakeDiscardUse1Use2`
+C. `Use1Use2MakeDiscard`
+D. `MakeUse1DiscardUse2`
+E. コンパイルエラーが発生する
+
+**実施記録**
+
+回答：A
+正解：A
+迷ったポイント：なし。
+
+<a id="q62"></a>
+## 問題62
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        try (Box box = new Box()) {
+            System.out.print("Use");
+        } finally {
+            System.out.print("Cleanup");
+        }
+    }
+}
+class Box implements AutoCloseable {
+    public Box() { System.out.print("Make"); }
+    public void close() { System.out.print("Discard"); }
+}
+```
+
+実行結果として正しいものを1つ選んでください。
+
+A. `MakeUseCleanupDiscard`
+B. `MakeUseDiscardCleanup`
+C. `MakeCleanupUseDiscard`
+D. `CleanupMakeUseDiscard`
+E. コンパイルエラーが発生する
+
+**実施記録**
+
+回答：B
+正解：B
+迷ったポイント：なし。close→finallyの順が定着。
+
+<a id="q63"></a>
+## 問題63
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        try (Box first = new Box("1"); Box second = new Box("2")) {
+            System.out.print("Use");
+        }
+    }
+}
+class Box implements AutoCloseable {
+    String id;
+    Box(String id) { this.id = id; System.out.print("Make" + id); }
+    public void close() { System.out.print("Discard" + id); }
+}
+```
+
+実行結果として正しいものを1つ選んでください。
+
+A. `Make1Make2UseDiscard1Discard2`
+B. `Make1Make2UseDiscard2Discard1`
+C. `Make2Make1UseDiscard1Discard2`
+D. `Make1UseDiscard1Make2Discard2`
+E. コンパイルエラーが発生する
+
+**実施記録**
+
+回答：B
+正解：B
+迷ったポイント：なし。複数リソースの開く順(宣言順)・閉じる順(逆順)が定着。
+
+<a id="q64"></a>
+## 問題64
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        try (Cache cache = new Cache()) {
+            System.out.print("Use");
+        }
+    }
+}
+interface Named { String name(); }
+class Cache implements Named {
+    public String name() { return "cache"; }
+    public Cache() { System.out.print("Open"); }
+    public void close() { System.out.print("Close"); }
+}
+```
+
+コンパイル、実行するとどのような結果になりますか。（1つ選択）
+
+A. `OpenUseClose` が出力される
+B. `UseOpenClose` が出力される
+C. `Use` だけが出力される
+D. コンパイルエラーが発生する
+E. 実行時に例外が発生する
+
+**実施記録**
+
+回答：D
+正解：D
+迷ったポイント：なし。close()があっても、implements AutoCloseableが無ければ(無関係なNamedを実装していても)コンパイルエラーになる点を正しく把握。
+
+<a id="q65"></a>
+## 問題65
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        try (Logger log = new Logger(); Cache cache = new Cache()) {
+            System.out.print("Use");
+        }
+    }
+}
+class Logger implements AutoCloseable {
+    public Logger() { System.out.print("OpenLog"); }
+    public void close() { System.out.print("CloseLog"); }
+}
+class Cache {
+    public Cache() { System.out.print("OpenCache"); }
+    public void close() { System.out.print("CloseCache"); }
+}
+```
+
+コンパイル、実行するとどのような結果になりますか。（1つ選択）
+
+A. `OpenLogOpenCacheUseCloseCacheCloseLog` が出力される
+B. `OpenLogUseCloseLog` が出力される(Cacheは無視される)
+C. コンパイルエラーが発生する
+D. `OpenLogOpenCacheUse` が出力され、closeは呼ばれない
+E. 実行時に例外が発生する
+
+**実施記録**
+
+回答：C
+正解：C
+迷ったポイント：なし。片方がAutoCloseable未実装なだけで、無視されるのではなくコンパイルエラーになる点を正しく把握。
+
+<a id="q66"></a>
+## 問題66
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        try (Session session = new Session()) {
+            System.out.print("Use");
+        }
+    }
+}
+class Session implements AutoCloseable {
+    public Session() { System.out.print("Open"); }
+    public void close(int code) { System.out.print("Close" + code); }
+}
+```
+
+コンパイル、実行するとどのような結果になりますか。（1つ選択）
+
+A. `OpenUse` が出力され、closeは呼ばれない
+B. `OpenUseClose0` が出力される(codeはデフォルト値0で呼ばれる)
+C. コンパイルエラーが発生する
+D. `OpenUse` の後、実行時に例外が発生する
+E. `implements AutoCloseable`があるため無条件でコンパイルは通る
+
+**実施記録**
+
+回答：A
+正解：C
+迷ったポイント：シグネチャが合わない場合、黙って無視される(closeが呼ばれないだけ)と誤解した。実際は(1)Session自身がAutoCloseableの契約(引数無しclose())を果たしていないため宣言自体がエラー、(2)try側の呼び出しも引数無しclose()が無く二重にエラーになる。
+
+<a id="q67"></a>
+## 問題67
+
+```java
+import java.io.IOException;
+
+public class Main {
+    public static void main(String[] args) {
+        try {
+            new Main().validate(null);
+        } catch (RuntimeException ex) {}
+    }
+    public void validate(String input) throws IllegalStateException {
+        if (input == null) {
+            throw new IllegalStateException();
+        } else {
+            throw new IOException();
+        }
+    }
+}
+```
+
+次のプログラムに関する正しい説明はどれですか。(2つ選択)
+
+A. 5行目のcatchブロックがIllegalStateExceptionであればコンパイルが成功する
+B. 5行目のcatchブロックがIOExceptionであればコンパイルが成功する
+C. 7行目のthrowsと5行目のcatchブロックがIOExceptionであればコンパイルが成功する
+D. 9行目で明示的にIllegalStateExceptionをスローしなくても、8行目でJVMからスローされる
+E. 11行目がIOExceptionではなくIllegalArgumentExceptionであればコンパイルが成功する
+
+**実施記録**
+
+回答：B, E
+正解：C, E
+迷ったポイント：Bを選んでしまった。呼び出し側(main)のcatchだけ直しても、validate()自身のthrows宣言(IllegalStateExceptionのみ)が直らない限り内部のthrow new IOException()は解決しない点を見落とした。呼び出し側と宣言側の両方を揃える必要がある。
+
+<a id="q68"></a>
+## 問題68
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        try {
+            load();
+        } catch (RuntimeException e) {
+            System.out.println("handled");
+        }
+    }
+    static void load() throws java.io.FileNotFoundException {
+        throw new java.io.FileNotFoundException();
+    }
+}
+```
+
+このプログラムはこのままではコンパイルエラーです。どう直せば(単独で)コンパイルが通るか、当てはまるものをすべて選んでください。(他の行は変更しないものとする)
+
+A. main()のcatchをFileNotFoundExceptionにする
+B. main()のcatchをExceptionにする
+C. catchはRuntimeExceptionのまま、main()にthrows FileNotFoundExceptionを追加する
+D. catchブロックごと削除し、main()にthrows FileNotFoundExceptionを追加する
+E. main()は変えず、load()の中身だけthrow new RuntimeException();に変える(load()のthrows宣言はそのまま)
+
+**実施記録**
+
+回答：A, B, E
+正解：A, B, C, D
+迷ったポイント：Eを誤って含めた(コンパイラは実際に投げる型ではなく、宣言されたthrowsの型だけを見る点を見落とした)。C, Dを見落とした(catchで受けるかthrowsで宣言するかは対等な2つの選択肢であり、既存のcatchを残したままthrowsを追加する、または既存のcatchを無くしてthrowsだけにする、のどちらも有効な直し方である点)。
+
+**訂正(2026-08-25)**：Dの選択肢文言「catchブロックごと削除し」に欠陥があった。文字通り「catchだけ削除し、tryは残す」と読むと、`try { load(); }`だけが残り**catch/finally/リソース宣言のいずれも無いtry単体**になってコンパイルエラーになる(問題59と同じ理由、javacで実際に検証・再現済み)。出題者(Claude)が意図していたのは「try-catch全体を削除し、load()を直接呼ぶ」だったが、それは問題文に明記されておらず、勝手な飛躍だった。文字通りの読み方をすればDは不正解、正解はA, B, Cのみとするのが適切。
+
+なお、上記の訂正を手元(`sample/chap7/ex12/Main.java`)で試す過程で、CもDも一度「動かない」と見えた場面があったが、これは**別原因(`import java.io.FileNotFoundException;`の書き忘れ)**によるもので、C・D自体の妥当性とは無関係と判明(importを足せば両方ともjavacで正しくコンパイル成功を確認済み)。
+
+<a id="q69"></a>
+## 問題69
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        try {
+            connect();
+        } catch ( /* insert code here */ ) {
+            System.out.println("handled");
+        }
+    }
+    static void connect() throws java.sql.SQLException {
+        throw new java.sql.SQLException();
+    }
+}
+```
+
+コンパイルを成功させるには、catchに何を入れるか。当てはまるものをすべて選んでください。
+
+A. SQLException e
+B. Exception e
+C. Throwable e
+D. RuntimeException e
+E. IllegalArgumentException e
+
+**実施記録**
+
+回答：A, B, C
+正解：A, B, C
+迷ったポイント：なし。
+
+<a id="q70"></a>
+## 問題70
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        process();
+    }
+    static void process() {
+        try {
+            connect();
+        } catch (java.sql.SQLException e) {
+            System.out.println("handled inside process");
+        }
+    }
+    static void connect() throws java.sql.SQLException {
+        throw new java.sql.SQLException();
+    }
+}
+```
+
+コンパイル、実行するとどのような結果になりますか。（1つ選択）
+
+A. handled inside process が出力される
+B. コンパイルエラーが発生する(process()にthrowsが無いため)
+C. コンパイルエラーが発生する(main()にthrowsが無いため)
+D. 実行時にSQLExceptionが発生する
+E. 何も出力されない
+
+**実施記録**
+
+回答：A
+正解：A
+迷ったポイント：なし。process()内でcatchし切っていれば、そこから上(main())には一切throwsもcatchも不要である点を正しく把握。
+
+<a id="q71"></a>
+## 問題71
+
+```java
+import java.sql.SQLException;
+
+class Super {
+    public void connect() throws SQLException {}
+}
+class Sub extends Super {
+    @Override
+    // insert code here
+}
+```
+
+コンパイルを成功させるには、7行目に何を挿入するか。当てはまるものをすべて選んでください。
+
+A. `public void connect() {}`
+B. `public void connect() throws IllegalStateException {}`
+C. `public void connect() throws java.sql.SQLException {}`
+D. `public void connect() throws java.io.IOException {}`
+E. `public void connect() throws Exception {}`
+
+**実施記録**
+
+回答：A, B
+正解：A, B, C
+迷ったポイント：Cを見落とした(「narrowerにしないといけない」という思い込みが強く、親と完全に同じ型を宣言するケースも許容される点を見落とした)。
+
+<a id="q72"></a>
+## 問題72
+
+```java
+class Super {
+    public void open() throws java.io.IOException {}
+}
+class Sub extends Super {
+    @Override
+    // insert code here
+}
+```
+
+コンパイルを成功させるには、5行目に何を挿入するか。当てはまるものをすべて選んでください。
+
+A. `public void open() throws java.io.FileNotFoundException {}`
+B. `public void open() throws java.io.EOFException {}`
+C. `public void open() throws java.io.IOException {}`
+D. `public void open() throws java.sql.SQLException {}`
+E. `public void open() {}`
+
+**実施記録**
+
+回答：A, B, E
+正解：A, B, C, E
+迷ったポイント：問題71と同じ理由でCを見落とした(親と完全に同じ型も許容される)。
+
+<a id="q73"></a>
+## 問題73
+
+```java
+class Super {
+    public void fetch() throws java.io.IOException, ClassNotFoundException {}
+}
+class Sub extends Super {
+    @Override
+    // insert code here
+}
+```
+
+コンパイルを成功させるには、5行目に何を挿入するか。当てはまるものをすべて選んでください。
+
+A. `public void fetch() throws java.io.IOException {}`
+B. `public void fetch() throws ClassNotFoundException {}`
+C. `public void fetch() throws java.io.FileNotFoundException {}`
+D. `public void fetch() throws java.io.IOException, ClassNotFoundException, ArithmeticException {}`
+E. `public void fetch() throws Exception {}`
+
+**実施記録**
+
+回答：C
+正解：A, B, C, D
+迷ったポイント：A, B, Dを見落とした。親が複数のチェック例外を宣言している場合、子はその「それぞれ独立に」narrower or sameであればよく、両方を必ず含める必要はない(片方だけ書く／両方とも親と同じ型のまま書く、のどちらも有効)。また、Dのように親と同じ2つの型に加えてunchecked例外(ArithmeticException)を追加するのは、uncheckedがこのルールの対象外であるため自由に可能。
+
+<a id="q74"></a>
+## 問題74
+
+```java
+class Super {
+    public void run() throws Exception {}
+}
+class Sub extends Super {
+    @Override
+    // insert code here
+}
+```
+
+コンパイルを成功させるには、5行目に何を挿入するか。当てはまるものをすべて選んでください。
+
+A. `public void run() {}`
+B. `public void run() throws Exception {}`
+C. `public void run() throws java.io.IOException {}`
+D. `public void run() throws Throwable {}`
+E. `public void run() throws RuntimeException {}`
+
+**実施記録**
+
+回答：A, B, C, E
+正解：A, B, C, E
+迷ったポイント：なし。`Throwable`は`Exception`の親（さらに広い型）なので widening になり不可、という点も正しく判断できた。
+
+<a id="q75"></a>
+## 問題75
+
+```java
+class Super {
+    public void load() throws ClassNotFoundException {}
+}
+class Sub extends Super {
+    @Override
+    // insert code here
+}
+```
+
+コンパイルを成功させるには、5行目に何を挿入するか。当てはまるものをすべて選んでください。
+
+A. `public void load() {}`
+B. `public void load() throws ClassNotFoundException {}`
+C. `public void load() throws java.lang.ReflectiveOperationException {}`
+D. `public void load() throws java.io.IOException {}`
+E. `public void load() throws Error {}`
+
+**実施記録**
+
+回答：A, B, E
+正解：A, B, E
+迷ったポイント：なし。Cが`ClassNotFoundException`の親クラス(widening)である点、Dが無関係のチェック例外である点、Eの`Error`はRuntimeExceptionと同様unchecked扱いで無条件に追加可能な点、いずれも正しく判断できた。
+
+<a id="q76"></a>
+## 問題76
+
+```java
+class Super {
+    public void transfer() throws java.io.IOException, java.sql.SQLException {}
+}
+class Sub extends Super {
+    @Override
+    // insert code here
+}
+```
+
+コンパイルを成功させるには、5行目に何を挿入するか。当てはまるものをすべて選んでください。
+
+A. `public void transfer() throws java.io.IOException, java.sql.SQLException {}`
+B. `public void transfer() throws java.io.FileNotFoundException {}`
+C. `public void transfer() throws java.sql.SQLException, RuntimeException {}`
+D. `public void transfer() throws java.io.IOException, ClassNotFoundException {}`
+E. `public void transfer() throws Exception {}`
+
+**実施記録**
+
+回答：A, B, C
+正解：A, B, C
+迷ったポイント：なし。Dは`IOException`部分は問題ないが`ClassNotFoundException`が親のどちらの宣言のnarrower/sameにも該当しないため不可、という「複数チェック例外は個別に判定」の原則を正しく適用できた。
+
+<a id="q77"></a>
+## 問題77
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        try {
+            process();
+            System.out.print("Done! ");
+        } catch (Exception ex) {
+            System.out.print("Caught! ");
+        }
+    }
+    static void process() throws java.sql.SQLException {
+        try {
+            try {
+                throw new ArithmeticException();
+            } catch (RuntimeException e) {
+                System.out.print("Arithmetic! ");
+            }
+            throw new java.sql.SQLException("SQL problem! ");
+        } catch (Exception e) {
+            System.out.print("SQLCaught! ");
+        }
+    }
+}
+```
+
+コンパイル、実行するとどのような結果になりますか。（1つ選択）
+
+A. `Arithmetic! SQLCaught! Done! ` が出力される
+B. `Arithmetic! SQL problem! Caught! ` が出力される
+C. `Arithmetic! SQLCaught! Caught! ` が出力される
+D. `Arithmetic! Caught! ` が出力される
+E. コンパイルエラーが発生する
+
+**実施記録**
+
+回答：A
+正解：A
+迷ったポイント：なし。process()内でSQLExceptionまで完全にcatchし切っているため、main()側は素通りして"Done! "が出力される点、SQLExceptionのメッセージ文字列はgetMessage()を呼ばない限り出力されない点、どちらも正しく把握できていた。
+
+<a id="q78"></a>
+## 問題78
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        try {
+            process();
+            System.out.print("Done! ");
+        } catch (Exception ex) {
+            System.out.print("Caught! ");
+        }
+    }
+    static void process() throws java.sql.SQLException {
+        try {
+            try {
+                throw new NullPointerException();
+            } catch (RuntimeException e) {
+                System.out.print("NPE! ");
+            }
+            throw new java.sql.SQLException("SQL problem! ");
+        } catch (ArithmeticException e) {
+            System.out.print("SQLCaught! ");
+        }
+    }
+}
+```
+
+コンパイル、実行するとどのような結果になりますか。（1つ選択）
+
+A. `NPE! SQLCaught! Done! ` が出力される
+B. `NPE! Caught! ` が出力される
+C. `NPE! SQLCaught! Caught! ` が出力される
+D. `NPE! ` の出力後、実行時例外が発生してプログラムが異常終了する
+E. コンパイルエラーが発生する
+
+**実施記録**
+
+回答：B
+正解：B
+迷ったポイント：なし。外側のcatch(ArithmeticException)はSQLExceptionと無関係な型なのでマッチせず、その場でprocess()の外へ伝播し、main()のcatch(Exception ex)まで飛ぶ("Done! "は出力されない)という流れを正しく追えていた。
+
+<a id="q79"></a>
+## 問題79
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        try {
+            test();
+            System.out.print("Done! ");
+        } catch (Exception ex) {
+            System.out.print("Caught! ");
+        }
+    }
+    static void test() throws java.io.IOException {
+        try {
+            try {
+                throw new IllegalStateException();
+            } catch (RuntimeException e) {
+                System.out.print("State! ");
+            }
+            throw new java.io.FileNotFoundException("missing! ");
+        } catch (RuntimeException e) {
+            System.out.print("RTCaught! ");
+        } catch (java.io.IOException e) {
+            System.out.print("IOCaught! ");
+        }
+    }
+}
+```
+
+コンパイル、実行するとどのような結果になりますか。（1つ選択）
+
+A. `State! RTCaught! Done! ` が出力される
+B. `State! IOCaught! Done! ` が出力される
+C. `State! IOCaught! Caught! ` が出力される
+D. `State! Caught! ` が出力される
+E. コンパイルエラーが発生する（同じtryに複数のcatchは書けないため）
+
+**実施記録**
+
+回答：B
+正解：B
+迷ったポイント：なし。1つのtryに複数catchを並べられること、上から順にマッチする型を探し最初のcatch(RuntimeException)はFileNotFoundExceptionと無関係なのでスキップされ、2番目のcatch(IOException)でマッチする、という流れを正しく把握できていた。
+
+<a id="q80"></a>
+## 問題80
+
+```java
+class FirstException extends RuntimeException {
+    FirstException() {}
+    FirstException(String message) { super(message); }
+}
+class SecondException extends FirstException {
+    // コンストラクタは一切定義されていない
+}
+public class Main {
+    public static void main(String[] args) {
+        try {
+            SecondException ex;
+            // insert code here
+            throw ex;
+        } catch(SecondException ex) {}
+    }
+}
+```
+
+コンパイルを成功させるには、`// insert code here`に何を挿入するか。当てはまるものをすべて選んでください。
+
+A. `ex = new SecondException();`
+B. `ex = new SecondException("msg");`
+C. `ex = new FirstException();`
+D. `ex = new FirstException("msg");`
+E. `ex = new SecondException(new Exception());`
+
+**実施記録**
+
+回答：A, E
+正解：A
+迷ったポイント：Eを誤って含めた。`SecondException`自身は一切コンストラクタを定義しておらず、自動生成される無引数のデフォルトコンストラクタしか存在しないため、`new SecondException(...)`に何らかの引数を渡す形はすべて不可という点を見落とした。
+
+<a id="q81"></a>
+## 問題81
+
+```java
+class FirstException extends RuntimeException {
+    FirstException(String message) { super(message); }
+}
+class SecondException extends FirstException {
+    // コンストラクタは一切定義されていない
+}
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Hello");
+    }
+}
+```
+
+コンパイル、実行するとどのような結果になりますか。（1つ選択）
+
+A. `Hello` が出力される
+B. コンパイルエラーが発生する
+C. `SecondException`が一度も使われていないため警告のみで、`Hello`は出力される
+D. 実行時に例外が発生してプログラムが異常終了する
+E. `SecondException`のクラス定義を削除すれば`Hello`が出力されるが、このままではコンパイルエラーになる（Bとは異なる理由で）
+
+**実施記録**
+
+回答：E
+正解：B(意図した正解)
+迷ったポイント：Eを選んだが、これは出題側(Claude)の設問設計に欠陥があったため。
+
+**訂正(2026-08-25)**：Eの文言「Bとは異なる理由で」が破綻していた。Eの前半（`SecondException`を削除すれば`Hello`が出力される）も後半（このままではコンパイルエラーになる）も、文としては両方とも真である。一方Bは「コンパイルエラーが発生する」とだけ書いており理由を一切述べていないため、「Bとは異なる理由」という比較自体が意味を成立させていない。単一選択問題として、BもEも事実として正しい記述になってしまっており、問題68と同種の設計ミス。意図していた正解は、具体的な技術的原因(`SecondException`の暗黙の`super()`が、無引数コンストラクタを持たない`FirstException`の中に対応先を見つけられずコンパイルエラーになる、というjavacで確認済みの実際の原因)を素直に指すBとするのが適切。
+
+<a id="q82"></a>
+## 問題82
+
+```java
+class BaseException extends RuntimeException {
+    BaseException(String message) { super(message); }
+}
+class MidException extends BaseException {
+    MidException(String message) { super(message); }
+    MidException(Throwable cause) { super(cause.getMessage()); }
+}
+class LeafException extends MidException {
+    LeafException() { super(new RuntimeException("default")); }
+    LeafException(Throwable cause) { super(cause); }
+}
+public class Main {
+    public static void main(String[] args) {
+        try {
+            LeafException ex;
+            // insert code here
+            throw ex;
+        } catch(LeafException ex) {}
+    }
+}
+```
+
+コンパイルを成功させるには、`// insert code here`に何を挿入するか。当てはまるものをすべて選んでください。
+
+A. `ex = new LeafException();`
+B. `ex = new LeafException(new Exception("boom"));`
+C. `ex = new LeafException("boom");`
+D. `ex = new MidException(new Exception("boom"));`
+E. `ex = new BaseException("boom");`
+
+**実施記録**
+
+回答：A, B
+正解：A, B
+迷ったポイント：なし。3階層になっても「そのクラス自身が定義しているコンストラクタのみが使える(継承しない)」「変数への代入は宣言型と同じか、それより下(派生クラス)のインスタンスのみ可能、上(祖先クラス)のインスタンスは不可」という2つの原則を正しく適用できていた。
