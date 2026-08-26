@@ -21,3 +21,8 @@
 | 4 | [原本4-9](chapter4_practice/original_problems.md#q4-9) | D, E | B, E |
 | 4 | [原本4-10](chapter4_practice/original_problems.md#q4-10) | A | B |
 | 4 | [原本4-13](chapter4_practice/original_problems.md#q4-13) | F | B |
+| 5 | [原本5-1](chapter5_practice/original_problems.md#q5-1) | B | C |
+| 5 | [原本5-10](chapter5_practice/original_problems.md#q5-10) | C, D, F | B, D, F |
+| 5 | [原本5-14](chapter5_practice/original_problems.md#q5-14) | C | A |
+| 5 | [原本5-15](chapter5_practice/original_problems.md#q5-15) | D | E |
+| 5 | [原本5-16](chapter5_practice/original_problems.md#q5-16) | A | D |
