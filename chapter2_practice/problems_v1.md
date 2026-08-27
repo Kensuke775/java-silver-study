@@ -34,10 +34,30 @@
 - [問題5-4](#q5-4)
 - [問題5-5](#q5-5)
 - [問題6-1](#q6-1)
+- [問題6-2](#q6-2)
+- [問題6-3](#q6-3)
+- [問題6-4](#q6-4)
 - [問題7-1](#q7-1)
 - [問題7-2](#q7-2)
 - [問題7-3](#q7-3)
 - [問題7-4](#q7-4)
+- [問題7-5](#q7-5)
+- [問題7-6](#q7-6)
+- [問題7-7](#q7-7)
+- [問題8-1](#q8-1)
+- [問題8-2](#q8-2)
+- [問題8-3](#q8-3)
+- [問題8-4](#q8-4)
+- [問題9-1](#q9-1)
+- [問題10-1](#q10-1)
+- [問題11-1](#q11-1)
+- [問題11-2](#q11-2)
+- [問題11-3](#q11-3)
+- [問題11-4](#q11-4)
+- [問題12-1](#q12-1)
+- [問題13-1](#q13-1)
+- [問題14-1](#q14-1)
+- [問題26](#q26)
 - [参考：進数変換の計算方法](#ref-conversion)
 
 <a id="q1"></a>
@@ -1982,6 +2002,1342 @@ F. コンパイルエラーが発生する
 回答：D
 正解：D
 迷ったポイント：なし
+
+---
+
+<a id="q6-2"></a>
+## 問題6-2
+
+**要点（chap2/6 由来・詳細）**
+
+- `new String("Hello")`は、たとえ定数プールに同じ内容の`"Hello"`が既にあっても、必ずヒープ上に別のオブジェクトを新規作成する。そのため`==`は`false`になる。
+- `.intern()`を呼ぶと、そのオブジェクトと同じ内容の定数プール上の参照が明示的に返される。
+- リテラル同士の連結（例：`"Hel" + "lo"`）はコンパイル時定数式としてコンパイラがコンパイル時に結合し、その結果も定数プールにインターンされる。つまりリテラルを直接書いたのと同じ扱いになる。
+- `final`が付いていない変数を使った連結（例：`e1 + "lo"`）は実行時に評価され、生成された`String`は自動的には定数プールに登録されない。
+- `final`変数でも、その初期化子がリテラルなどコンパイル時定数式であれば、その変数自体もコンパイル時定数として扱われるため、それを使った連結も引き続きコンパイル時に結合される。
+
+次のコードを実行したとき、`true`になる比較を**すべて**選んでください。
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        String a = new String("Hello");
+        String b = "Hello";
+        String c = a.intern();
+        String d = "Hel" + "lo";
+        String e1 = "Hel";
+        String e2 = e1 + "lo";
+        final String f1 = "Hel";
+        String f2 = f1 + "lo";
+
+        System.out.println(a == b);
+        System.out.println(c == b);
+        System.out.println(d == b);
+        System.out.println(e2 == b);
+        System.out.println(f2 == b);
+    }
+}
+```
+
+A. `a == b`
+
+B. `c == b`
+
+C. `d == b`
+
+D. `e2 == b`
+
+E. `f2 == b`
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+**実施記録**
+
+回答：B, C
+正解：B, C, E
+迷ったポイント：final変数の初期化子がリテラル（コンパイル時定数式）であれば、その変数を使った連結もコンパイル時に結合され定数プールにインターンされることを見落とした
+
+---
+
+<a id="q6-3"></a>
+## 問題6-3
+
+**要点（chap2/6 由来・実行）**
+
+- 同じ内容のリテラルで初期化された変数（`x`と`y`）は定数プール上の同じオブジェクトを参照するため`==`は`true`。
+- `new String("abc")`は内容が同じでも別オブジェクトを生成するため、リテラル変数との`==`は`false`。ただし`.equals()`は内容比較なので`true`。
+- `y += "d";`は`y`が指すオブジェクトを書き換えるのではなく、新しく作られた`"abcd"`という別オブジェクトに`y`の参照先を差し替えるだけ。`x`はこの操作の影響を受けず`"abc"`のまま。
+- 結果として、連結後は`x`と`y`が別々の内容・別々のオブジェクトを指すため`x == y`は`false`になる。
+
+次のコードを実行した結果として正しいものを1つ選んでください。
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        String x = "abc";
+        String y = "abc";
+        String z = new String("abc");
+
+        System.out.println(x == y);
+        System.out.println(x == z);
+        System.out.println(x.equals(z));
+
+        y += "d";
+        System.out.println(x);
+        System.out.println(y);
+        System.out.println(x == y);
+    }
+}
+```
+
+A.
+```
+true
+true
+true
+abc
+abcd
+false
+```
+
+B.
+```
+true
+false
+false
+abc
+abcd
+false
+```
+
+C.
+```
+true
+false
+true
+abcd
+abcd
+false
+```
+
+D.
+```
+true
+false
+true
+abc
+abcd
+true
+```
+
+E.
+```
+true
+false
+true
+abc
+abcd
+false
+```
+
+F. コンパイルエラーが発生する
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+**実施記録**
+
+回答：E
+正解：E
+迷ったポイント：なし
+
+---
+
+<a id="q6-4"></a>
+## 問題6-4
+
+**要点（chap2/6 由来・難問）**
+
+- `final`が付いていても、その初期化子がメソッド呼び出しの戻り値など実行時にしか確定しない値の場合、その変数はコンパイル時定数として扱われない。
+- コンパイル時定数として扱われない`final`変数を使った文字列連結は、実行時に評価される（＝定数プールに自動で入らない、リテラルとの`==`比較で`false`になりうる）。
+- 一方、リテラル同士の連結（`"Hel" + "lo"`のような）はコンパイラが常にコンパイル時に結合するため、こちらは`final`修飾子の有無に関係なく定数プールにインターンされる。
+- `.equals()`は常に内容比較なので、参照が別オブジェクトでも中身が同じであれば`true`になる。
+
+次のコードを実行した結果として正しいものを1つ選んでください。
+
+```java
+public class Main {
+    static String makeHel() {
+        return "Hel";
+    }
+
+    public static void main(String[] args) {
+        final String a = makeHel();
+        String b = a + "lo";
+        String c = "Hello";
+        System.out.println(b);
+        System.out.println(b == c);
+        System.out.println(b.equals(c));
+
+        String d = "Hel" + "lo";
+        System.out.println(d == c);
+    }
+}
+```
+
+A.
+```
+Hello
+true
+true
+true
+```
+
+B.
+```
+Hello
+false
+false
+true
+```
+
+C.
+```
+Hello
+false
+true
+false
+```
+
+D.
+```
+Hello
+true
+true
+false
+```
+
+E.
+```
+Hello
+false
+true
+true
+```
+
+F. コンパイルエラーが発生する（final変数の初期化にメソッド呼び出しは使えないため）
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+**実施記録**
+
+回答：E
+正解：E
+迷ったポイント：なし
+
+---
+
+<a id="q7-1"></a>
+## 問題7-1
+
+**要点（chap2/7 由来）**
+
+- Java 10以降、ローカル変数の宣言で`var`を使うと、コンパイラが初期化子（右辺の式）の型から変数の型を自動的に推論する（ローカル変数型推論）。
+- `var`は**ローカル変数の宣言でのみ**使用できる。フィールド（クラスのメンバ変数）、メソッドの引数、メソッドの戻り値の型には使用できない。
+- `var`宣言には必ず初期化子が必要。`var d;`のように初期化子なしで宣言すると、型を推論できずコンパイルエラーになる。
+- 初期化子に`null`だけを指定することはできない（`null`単体からは型を推論できないため）。
+- 1つの`var`宣言文で複数の変数をまとめて宣言する「複合宣言」はできない（`var f = 1, c = 2;`はコンパイルエラー）。
+- `final`修飾子は`var`と併用できる（`final var g = "Duke";`は問題なくコンパイルされる）。
+
+次のうち、単独でコンパイルエラーになるものをすべて選んでください（`main`メソッド内に書かれたコードとして考えてください）。
+
+A.
+```java
+public class Main {
+    var a = 100;
+    public static void main(String[] args) {}
+}
+```
+
+B.
+```java
+public class Main {
+    public static void main(String[] args) {
+        var b = "Java";
+    }
+}
+```
+
+C.
+```java
+public class Main {
+    public static void main(String[] args) {
+        var d;
+        d = 1;
+    }
+}
+```
+
+D.
+```java
+public class Main {
+    public static void main(String[] args) {
+        var e = null;
+    }
+}
+```
+
+E.
+```java
+public class Main {
+    public static void main(String[] args) {
+        var f = 1, c = 2;
+    }
+}
+```
+
+F.
+```java
+public class Main {
+    public static void main(String[] args) {
+        final var g = "Duke";
+    }
+}
+```
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+**実施記録**
+
+回答：A, C, D, E
+正解：A, C, D, E
+迷ったポイント：なし
+
+---
+
+<a id="q7-2"></a>
+## 問題7-2
+
+**要点（chap2/7 由来）**
+
+- `var`は**予約語ではなく「制限された型名」**である。そのため、変数名やメソッド名として`var`という識別子をそのまま使うことができる（例：`var var = 5;`や`static void var() {}`は合法）。
+- ただし、**クラス名やインターフェース名として`var`を使うことはできない**（型を宣言する位置でのみ`var`という名前が禁止される）。
+- `var`で推論された型は宣言時に一度だけ確定し、以降その変数に別の型の値を再代入することはできない（推論後は明示的に型を書いた場合と同じ静的型付けが適用される）。
+- 初期化子に`null`を直接書くことはできないが、キャストで型を明示すれば代入できる（例：`var e = (String) null;`は合法）。
+
+次の記述のうち、**誤っているもの**をすべて選んでください。
+
+A. `var`はローカル変数だけでなく、フィールドやメソッドの引数、戻り値の型としても使用できる。
+
+B. `var`で宣言した変数の型は初期化子から一度だけ推論され、後から別の型の値を再代入することはできない。
+
+C. `var`という名前は変数名やメソッド名として使うことができるが、クラス名やインターフェース名としては使用できない。
+
+D. `final`修飾子と`var`は同時に使用できない。`final`は明示的に型を書いた変数にしか付与できない。
+
+E. `var`の初期化子に`null`を直接書くことはできないが、`var e = (String) null;`のようにキャストすれば型を明示して代入できる。
+
+F. 1つの`var`宣言文で複数の変数をまとめて宣言すること（例：`var f = 1, c = 2;`）はできない。
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+**実施記録**
+
+回答：A, C, D, E
+正解：A, D
+迷ったポイント：CとE（varは変数名/メソッド名としては使えるがクラス名/インターフェース名としては使えないこと、var e = (String) null;のようにキャストすれば型を明示してnullを代入できること）を誤りだと思い込んでいた。実際はどちらも正しい記述で、コンパイルが通ることをjavacで確認済み。
+
+---
+
+<a id="q7-3"></a>
+## 問題7-3
+
+**要点（chap2/7 由来）**
+
+- `var`で推論された型は、明示的にその型を書いた場合とまったく同じように振る舞う。拡張for文（`for (var ch : letters)`）でも、配列の要素の型がそのまま推論される。
+- `char`配列を拡張forで1文字ずつ取り出し`StringBuilder`に`append`していけば、元の並び順の文字列が組み立てられる。
+- `StringBuilder#reverse()`は呼び出し元の`StringBuilder`の中身自体を反転させ、そのインスタンスを返す。
+
+次のコードを実行した結果として正しいものを1つ選んでください。
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        var letters = new char[]{'J', 'a', 'v', 'a'};
+        var builder = new StringBuilder();
+        for (var ch : letters) {
+            builder.append(ch);
+        }
+        var result = builder.reverse().toString();
+        System.out.println(result);
+    }
+}
+```
+
+A. Java
+
+B. JavaJ
+
+C. コンパイルエラーが発生する
+
+D. aavJ
+
+E. avaJ
+
+F. avJa
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+**実施記録**
+
+回答：E
+正解：E
+迷ったポイント：なし
+
+---
+
+<a id="q7-4"></a>
+## 問題7-4
+
+**要点（chap2/7 由来）**
+
+- オーバーロードされたメソッドのうちどれが呼ばれるかは、実行時の実際のオブジェクトの型ではなく、**コンパイル時点での変数の静的な型（宣言された型／推論された型）**によって決まる。
+- `Object obj = "Hello";`のように書くと、`obj`の静的な型は`Object`になる（実行時に中身が`String`であっても関係ない）。そのため`obj`を引数に渡すと`show(Object)`が呼ばれる。
+- 一方、`var str = "World";`は初期化子`"World"`から型が推論されるため、`str`の静的な型は`String`になる。そのため`str`を引数に渡すと`show(String)`が呼ばれる。
+- つまり`var`は「型が曖昧になる」わけではなく、初期化子から確定した具体的な型を持つ、通常の型宣言と同等の変数になる。
+- **オーバーロード解決（どのメソッド定義を呼ぶか）は、コンパイル時に引数の静的型（変数の宣言型／`var`の推論結果）だけを見て決まる。** コンパイラがこの判断をコンパイル時点で終わらせてバイトコードに焼き付けるため、実行時に変数が実際にどのオブジェクトを指しているか（動的型）は一切関係しない。
+- これは**メソッドのオーバーライド（動的ディスパッチ）とは対照的**な仕組み。オーバーライドは実行時に動的型（実際のオブジェクトの実クラス）を見て、どのサブクラスの実装を呼ぶかを決める。一方オーバーロードの選択は静的ディスパッチで、実行時の型は無関係に、コンパイル時の静的型だけで決まる。
+
+次のコードを実行した結果として正しいものを1つ選んでください。
+
+```java
+public class Main {
+    static void show(Object o) {
+        System.out.println("Object: " + o);
+    }
+
+    static void show(String s) {
+        System.out.println("String: " + s);
+    }
+
+    public static void main(String[] args) {
+        Object obj = "Hello";
+        var str = "World";
+        show(obj);
+        show(str);
+    }
+}
+```
+
+A.
+```
+Object: Hello
+Object: World
+```
+
+B.
+```
+String: Hello
+String: World
+```
+
+C.
+```
+Object: Hello
+String: World
+```
+
+D.
+```
+String: Hello
+Object: World
+```
+
+E. コンパイルエラーが発生する（`show`の呼び出しが曖昧）
+
+F.
+```
+Object: World
+String: Hello
+```
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+**実施記録**
+
+回答：B
+正解：C
+迷ったポイント：objの中身が実際にはStringだから、show(obj)もshow(String)が呼ばれると思っていた。しかしオーバーロード解決はobjの静的型（宣言型のObject）で決まり、実行時の動的型（実体がString）は関係しない。これはオーバーライド（動的ディスパッチ）と対照的な静的ディスパッチの仕組み。
+
+---
+
+<a id="q7-5"></a>
+## 問題7-5
+
+**要点（chap2/7 由来）**
+
+- `var`はローカル変数宣言専用。クラスのフィールドやメソッドの引数・戻り値の型には使用できない。
+- `var`宣言には必ず初期化子が必要。初期化子なしの`var d;`はコンパイルエラー。
+- 初期化子が`null`だけの場合、型を推論できずコンパイルエラーになる。
+- `var`は1つの宣言文で1つの変数しか宣言できない。`var f = 1, c = 2;`のような複合宣言はコンパイルエラー。
+- `final`修飾子は`var`と併用できる（`final var g = "Duke";`は合法）。
+- `var`は予約語ではないため、変数名として使うことができる（`char var = 'V';`は合法）。
+
+次のうち、**コンパイルエラーになるものを全て**選んでください。
+
+A. メソッド内で `var b = "Java";` と宣言する
+
+B. クラスのフィールドとして `var a = 100;` と宣言する
+
+C. メソッド内で `var d;`（初期化子なし）と宣言する
+
+D. メソッド内で `var e = null;`（初期化子が`null`のみ）と宣言する
+
+E. メソッド内で `final var g = "Duke";` と宣言する
+
+F. メソッド内で `var f = 1, c = 2;`（1文で複数のローカル変数を宣言）する
+
+G. メソッド内で `char var = 'V';`（`var`という名前の`char`型変数を宣言）する
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+**実施記録**
+
+回答：B, C, D, F
+正解：B, C, D, F
+迷ったポイント：なし
+
+---
+
+<a id="q7-6"></a>
+## 問題7-6
+
+**要点（chap2/7 由来）**
+
+- nullを**参照型**にキャストして`var`変数へ代入するのは合法（`var e = (String) null;`。`e`の型は`String`、値は`null`）。
+- nullを**プリミティブ型**にキャストすることはできない。`var f = (int) null;`はコンパイルエラーになる（`不適合な型: <null>をintに変換できません`）。
+- `new int[0][2]`は外側配列の長さが0の2次元配列。行が1つも存在しないため、内側の`[2]`という指定自体は実際には使われず、コンパイルエラーにもならない。
+- `Arrays.deepToString`で要素数0の配列を表示すると`[]`になる。
+
+```java
+import java.util.Arrays;
+
+public class Main {
+    public static void main(String[] args) {
+        var e = (String) null;
+        var i = new int[0][2];
+        System.out.println(e);
+        System.out.println(Arrays.deepToString(i));
+    }
+}
+```
+
+次のうち、**正しいものを全て**選んでください。
+
+A. 上記のコードは問題なくコンパイル・実行でき、`null` と `[]` が出力される
+
+B. このコードに `var f = (int) null;` という行を追加しても、正しくコンパイルできる
+
+C. `var f = (int) null;` はコンパイルエラーになる（`null`をプリミティブ型の`int`にキャストすることはできないため）
+
+D. `new int[0][2]` は内側の次元`2`と矛盾するためコンパイルエラーになる
+
+E. `Arrays.deepToString(new int[0][2])` は行が存在しないため `[]` と出力される
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+**実施記録**
+
+回答：
+正解：A, C, E
+迷ったポイント：
+
+---
+
+<a id="q7-7"></a>
+## 問題7-7
+
+**要点（chap2/7 由来）**
+
+- `double`で成り立つ「10⁻³以上10⁷未満なら通常表記、それ以外（10⁷以上または10⁻³未満）ならE表記」というしきい値は、`float`でもまったく同じ基準で適用される。
+- 境界値の扱いも同じ：`10⁻³`（`0.001`）はまだ通常表記側、`10⁷`（`1.0e7`）はE表記側。
+- `float`は有効桁数が`double`より少ないが、`9999999`のように7桁の整数値は正確に表現できる範囲内なので、そのまま通常表記で出力される。
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        float a = 9_999_999.0f;
+        float b = 1.0e7f;
+        float c = 5e-4f;
+        float d = 0.001f;
+        System.out.println(a);
+        System.out.println(b);
+        System.out.println(c);
+        System.out.println(d);
+    }
+}
+```
+
+次のコードを実行した結果として正しいものを1つ選んでください。
+
+A.
+```
+9999999.0
+1.0E7
+5.0E-4
+0.001
+```
+
+B.
+```
+1.0E7
+1.0E7
+5.0E-4
+0.001
+```
+
+C.
+```
+9999999.0
+1.0E7
+0.0005
+0.001
+```
+
+D. `float`は`double`と異なり常にE表記で出力されるため、上記とはまったく違う形式になる
+
+E. コンパイルエラーが発生する
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+**実施記録**
+
+回答：
+正解：A
+迷ったポイント：
+
+---
+
+<a id="q8-1"></a>
+## 問題8-1
+
+**要点（chap2/8 由来）**
+
+- 配列の要素数は `.length` という**フィールド**で取得する（`.length()` というメソッドではない）。
+- 配列リテラル `{...}` による初期化は、宣言と同時に書く場合のみ波括弧だけで書ける（別文での代入には `new` が必要、これは8-2で扱う）。
+- 配列のインデックスは0始まり。
+- 配列は生成後に要素数を変更できない（固定長）。
+- `new int[3]` で生成した `int` 配列の各要素は自動的に `0` で初期化される（javacで実際に確認済み: TestLenMethodはコンパイルエラー、TestDefaultZeroは`0,0,0`を出力）。
+
+以下は `sample/chap2/8/Main.java` の内容です。
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        int[] vers = new int[3];
+        vers[0] = 8; vers[1] = 11; vers[2] = 17;
+        System.out.println("vers.length : " +  vers.length);
+        int v = vers[0];
+        System.out.println("vers[1] : " + vers[1]);
+        System.out.println("vers[2] : " + vers[2]);
+//      System.out.println("vers[3] : " + vers[3]);
+        System.out.println();           // 改行
+        String[] cols = {"Red", "Black"};
+        System.out.println("cols.length : " + cols.length);
+    }
+}
+```
+
+配列に関する基礎知識として、**正しいものを全て**選んでください。
+
+A. 配列の要素数は `.length` というフィールドで取得する
+
+B. 配列の要素数は `.length()` というメソッド呼び出しで取得する
+
+C. `String[] cols = {"Red", "Black"};` のように、宣言と同時であれば波括弧だけで配列を初期化できる
+
+D. 配列のインデックスは0から始まる
+
+E. 配列は一度生成すると、後から要素数を変更できない
+
+F. `new int[3]` で生成した `int` 配列の各要素は、明示的に代入しなくても自動的に `0` で初期化される
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+**実施記録**
+
+回答：A, C, D, E, F
+正解：A, C, D, E, F
+迷ったポイント：なし
+
+---
+
+<a id="q8-2"></a>
+## 問題8-2
+
+**要点（chap2/8 由来）**
+
+- 配列初期化子 `{...}` の省略記法は、変数宣言と同時の場合にしか使えない。宣言済みの変数への別文での代入（`cols = {"Red","Black"};`）や、メソッド引数として渡す場合は、必ず `new String[]{...}` という完全な配列生成式を書く必要がある（波括弧だけではコンパイルエラー）。
+- `int a[] = new int[3];` のように、型の直後ではなく変数名の直後に `[]` を書く宣言方法（C言語由来のスタイル）も合法。
+- 配列のサイズに負の数を指定した場合（`new int[-1]`）、コンパイルは通り、実行時に `NegativeArraySizeException` が発生する（コンパイルエラーではない）。
+
+次のうち、**正しいものを全て**選んでください。
+
+A. `String[] cols;` と宣言した後、別の文で `cols = {"Red", "Black"};` と代入することができる
+
+B. `int a[] = new int[3];` のように、型ではなく変数名の直後に `[]` を書く宣言方法も合法である
+
+C. `int[] a = new int[-1];` はコンパイルエラーになる
+
+D. メソッドの引数に配列を渡す場合、波括弧だけの `{"Red", "Black"}` は使えず、`new String[]{"Red", "Black"}` のように `new` を使った式で書く必要がある
+
+E. `int[] a = new int[-1];` はコンパイルは通るが、実行時に `NegativeArraySizeException` が発生する
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+**実施記録**
+
+回答：A, B, C, D
+正解：B, D, E
+迷ったポイント：Aを配列初期化子の省略記法が宣言以外でも使えると誤解、Cを配列サイズの負数チェックがコンパイル時に行われると誤解(実際は実行時のNegativeArraySizeException)、Eの見落とし。
+
+---
+
+<a id="q8-3"></a>
+## 問題8-3
+
+**要点（chap2/8 由来）**
+
+- `int[]`の要素は生成時に自動で`0`初期化される（未代入でもデフォルト値が入っている）。
+- `String[]`（参照型の配列）の要素は生成時に自動で**`null`**で初期化される（空文字列ではない）。
+- `println(null参照)`は`NullPointerException`にはならず、文字通り`"null"`という文字列がそのまま出力される。
+- `int + String`（たとえString側がnull参照でも）の`+`は文字列連結として扱われ、数値側は文字列に変換されて連結される（`2 + null` → `"2null"`）。
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        int[] nums = new int[4];
+        nums[1] = 20;
+        nums[3] = 40;
+        System.out.println(nums[0] + nums[2]);
+        System.out.println(nums.length);
+        String[] words = new String[2];
+        System.out.println(words[0]);
+        System.out.println(words.length + words[1]);
+    }
+}
+```
+
+このコードを実行した結果として正しいものを1つ選んでください。
+
+A.
+```
+0
+4
+null
+2null
+```
+
+B.
+```
+0
+4
+
+2
+```
+
+C. 実行時に `NullPointerException` が発生する
+
+D.
+```
+0
+4
+null
+2
+```
+
+E. コンパイルエラーが発生する
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+**実施記録**
+
+回答：A
+正解：A
+迷ったポイント：選択肢としてはAを選び正解だったが、手元のトレースで3〜4行目を「null null」と誤解していた。実際は3行目が`words[0]`＝`null`単体の出力、4行目は別の文で`words.length + words[1]`（`2 + null`）の文字列連結により`"2null"`になる。「null」の再表示ではなく数値+nullの連結結果であることを再確認。
+
+---
+
+<a id="q8-4"></a>
+## 問題8-4
+
+**要点（chap2/8 由来）**
+
+- 配列は参照型。`int[] b = a;` は配列の中身をコピーするのではなく、同じ配列オブジェクトを指す別の変数を作るだけ（エイリアス）。`b`経由で要素を書き換えると、`a`側から見ても変わる。
+- `a == b` は同じオブジェクトを指していれば `true`。
+- 別途 `new int[]{...}` で生成した配列は、中身が同じでも別オブジェクトなので `==` は `false`。
+- 配列は `equals()` をオーバーライドしていない（`String`と違って中身比較にならない）ため、`.equals()` は `Object` のデフォルト実装どおり参照比較（`==`と同じ）になる。中身が同じでも別オブジェクトなら `false`。
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        int[] a = {1, 2, 3};
+        int[] b = a;
+        b[1] = 99;
+        System.out.println(a[1]);
+        System.out.println(a == b);
+        int[] c = new int[]{1, 2, 3};
+        System.out.println(a == c);
+        System.out.println(a.equals(c));
+    }
+}
+```
+
+このコードを実行した結果として正しいものを1つ選んでください。
+
+A.
+```
+99
+true
+false
+false
+```
+
+B.
+```
+2
+false
+false
+false
+```
+
+C.
+```
+99
+true
+true
+true
+```
+
+D.
+```
+99
+true
+false
+true
+```
+
+E. 実行時に `NullPointerException` が発生する
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+**実施記録**
+
+回答：A
+正解：A
+迷ったポイント：なし。「.equals()と==は同じことをしているのか」という良い質問があり、配列はequals()未オーバーライドのためこの場合に限りObjectのデフォルト実装（==と同じ）になる、全オブジェクト共通のルールではない、と補足説明した。
+
+---
+
+<a id="q9-1"></a>
+## 問題9-1
+
+**要点**
+
+- 配列を`new`で生成すると、各要素は明示的に初期化しなくても型ごとのデフォルト値で自動初期化される
+- 数値型(`int`, `double`など)のデフォルト値は`0`または`0.0`(`double`は`0.0`)
+- 参照型(`String`など)のデフォルト値は`null`
+- `println`で`null`を文字列連結すると、`NullPointerException`にはならず文字列`"null"`が出力される
+
+次のコードを実行した結果として正しいものを1つ選んでください。
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        double[] darr = new double[1];
+        String[] sarr = new String[1];
+        System.out.println("darr[0] : " + darr[0]);
+        System.out.println("sarr[0] : " + sarr[0]);
+    }
+}
+```
+
+A. `darr[0] : 0.0` と `sarr[0] : null` が出力される
+
+B. `darr[0] : 0` と `sarr[0] : null` が出力される
+
+C. `darr[0] : 0.0` と表示された後、`sarr[0]`で`NullPointerException`が発生する
+
+D. コンパイルエラーになる(配列要素が初期化されていない)
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+**実施記録**
+
+回答：A
+正解：A
+迷ったポイント：なし
+
+---
+
+<a id="q10-1"></a>
+## 問題10-1
+
+**要点**
+
+- 配列を`new`で生成する方法は2通り: ①`new int[3]`のようにサイズを指定する方法、②`new int[] {1, 2}`のように初期化子リストで要素を指定する方法(この場合`[]`内にサイズは書かない)
+- サイズ指定と初期化子リストを同時に使うことはできない(`new int[2] {1, 2}`はコンパイルエラー)
+- サイズのみ指定した場合、各要素は型のデフォルト値(`int`なら`0`)で初期化される
+
+次のコードのうち、コンパイルエラーになるものを1つ選んでください。
+
+```java
+A. var arr = new int[3];
+B. var arr = new int[] {1, 2, 3};
+C. var arr = new int[3] {1, 2, 3};
+D. var arr = new int[0];
+```
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+**実施記録**
+
+回答：C
+正解：C
+迷ったポイント：なし
+
+---
+
+<a id="q11-1"></a>
+## 問題11-1
+
+**要点（chap2/11 由来）**
+
+- `new int[2][3]` は「2行3列」の2次元配列を生成し、全要素は自動で `0` 初期化される。
+- `array.length` は**行数**（外側配列の要素数）を返し、`array[0].length` はその行（0行目）の**列数**を返す。
+- `int[][] array = {{100, 0, 0}, {0, 0, 200}};` のように、宣言と同時であれば波括弧のネストだけで2次元配列を初期化できる（1次元配列と同じルール）。
+- 2次元配列の各行（内側配列）は同じ列数である必要はなく、行ごとに異なる長さの配列を割り当てられる（ジャグ配列）。
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        int[][] array = new int[2][3];
+        array[0][0] = 100;
+        array[1][2] = 200;
+        System.out.println("array[0][0] : " + array[0][0]);
+        System.out.println("array[0][1] : " + array[0][1]);
+        System.out.println("array[0][2] : " + array[0][2]);
+        System.out.println("array[1][0] : " + array[1][0]);
+        System.out.println("array[1][1] : " + array[1][1]);
+        System.out.println("array[1][2] : " + array[1][2]);
+        System.out.println("------------------");
+        System.out.println("array.length : " + array.length);
+        System.out.println("array[0].length : " + array[0].length);
+        System.out.println("array[1].length : " + array[1].length);
+    }
+}
+```
+
+配列に関する基礎知識として、**正しいものを全て**選んでください。
+
+A. `new int[2][3]` は「2行3列」の2次元配列を生成し、全要素は自動で `0` 初期化される
+
+B. `array.length` は2次元配列の「列数」（内側配列の要素数）を返す
+
+C. `array[0].length` は0行目の列数を返す
+
+D. 2次元配列の各行（内側配列）は、必ず同じ列数でなければならない
+
+E. `int[][] array = {{100, 0, 0}, {0, 0, 200}};` のように、宣言と同時であれば波括弧のネストだけで2次元配列を初期化できる
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+**実施記録**
+
+回答：A, B, C, E
+正解：A, C, E
+迷ったポイント：Bを誤って正しいと判断した。array.lengthは列数ではなく行数（外側配列の要素数）を返し、列数はarray[0].lengthで取得するという対応関係を取り違えた。
+
+---
+
+<a id="q11-2"></a>
+## 問題11-2
+
+**要点（chap2/11 由来）**
+
+- `new int[2][]` のように**外側の次元だけ指定して内側（列数）を省略**するのは合法（ジャグ配列の宣言方法）。ただし逆に `new int[][3]` のように**先頭（一番外側）の次元を省略して内側だけ指定するのはコンパイルエラー**（次元は左から順に指定する必要がある）。
+- `int[][] x = {{1, 2}, {3}};` のように、波括弧のネスト初期化でも各行の要素数が異なるジャグ配列を作れる。
+- `new int[2][]` で行（内側配列）を確保しただけの状態では、各行はまだ`null`。行に配列を代入する前に`jagged[0][0]`のように要素へアクセスすると`NullPointerException`が発生する。
+- `[]`は型の直後・変数名の直後のどちらに置いても、分散させても合法（`int[][] a` / `int a[][]` / `int[] a[]` はすべて同じ2次元int配列として扱われる、合計3パターンとも検証済み）。
+
+次のうち、**正しいものを全て**選んでください。
+
+A. `new int[][3]` のように、先頭の次元（行数）を省略して内側の次元（列数）だけ指定することができる
+
+B. `new int[2][]` のように、内側の次元（列数）を省略して外側の次元（行数）だけ指定することができる
+
+C. `int[][] x = {{1, 2}, {3}};` のように、波括弧のネスト初期化でも各行の要素数が異なる配列を作ることができる
+
+D. `int[][] jagged = new int[2][];` のあと、各行に配列を代入する前に `jagged[0][0]` にアクセスすると、`NullPointerException` が発生する
+
+E. `int[] a[] = new int[2][3];` のように、型の直後と変数名の直後の両方に `[]` を混在させる宣言方法も合法である
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+**実施記録**
+
+回答：B, C, D
+正解：B, C, D, E
+迷ったポイント：Eを見落とした（型直後と変数名直後の[]混在も合法という点）。関連して「int a[][]（両方[]を変数名直後にまとめる完全Cスタイル）も合法か」と追加質問があり、javacで検証し合法と確認（チャットで回答済み）。
+
+---
+
+<a id="q11-3"></a>
+## 問題11-3
+
+**要点（chap2/11 由来）**
+
+- `new int[3][2]` は3行2列、全要素初期値`0`。個別に代入した要素以外は`0`のまま。
+- 2重ループで`grid.length`（行数）・`grid[i].length`（各行の列数）を使って全要素を走査・合計する定番パターン。
+- `grid.length`は行数、`grid[0].length`は列数を返す（11-1・11-2で確認した対応関係の再利用）。
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        int[][] grid = new int[3][2];
+        grid[0][1] = 5;
+        grid[1][0] = 10;
+        grid[2][0] = 15;
+        grid[2][1] = 20;
+
+        int sum = 0;
+        for (int i = 0; i < grid.length; i++) {
+            for (int j = 0; j < grid[i].length; j++) {
+                sum += grid[i][j];
+            }
+        }
+        System.out.println(sum);
+        System.out.println(grid[1][1]);
+        System.out.println(grid.length + "," + grid[0].length);
+    }
+}
+```
+
+このコードを実行した結果として正しいものを1つ選んでください。
+
+A.
+```
+50
+0
+3,2
+```
+
+B.
+```
+30
+0
+3,2
+```
+
+C.
+```
+50
+5
+3,2
+```
+
+D.
+```
+50
+0
+2,3
+```
+
+E. 実行時に例外が発生する
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+**実施記録**
+
+回答：A
+正解：A
+迷ったポイント：なし
+
+---
+
+<a id="q11-4"></a>
+## 問題11-4
+
+**要点（chap2/11 由来）**
+
+- 2次元配列は実は「配列の配列」。外側の各要素（各行）自体が、独立した1次元配列オブジェクトへの**参照**になっている。
+- `int[] row = m[0];` は行配列の参照をコピーするだけなので、`row`経由での書き換えは`m[0]`にもそのまま反映される（1次元配列のエイリアスと全く同じ仕組み）。
+- `m[1] = m[0];` のように外側配列の要素に別の行の参照を代入すると、その行（内側配列オブジェクト）を**複数の行インデックスが共有**するようになる。以降どちらの添字経由で書き換えても、同じオブジェクトが変わる。
+- こうした行の共有をしても、外側配列自体の行数（`m.length`）は変化しない。
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        int[][] m = new int[2][3];
+        int[] row = m[0];
+        row[1] = 99;
+        m[1] = m[0];
+        m[1][2] = 7;
+
+        System.out.println(m[0][1]);
+        System.out.println(m[0][2]);
+        System.out.println(m[0] == m[1]);
+        System.out.println(m.length);
+    }
+}
+```
+
+このコードを実行した結果として正しいものを1つ選んでください。
+
+A.
+```
+99
+7
+true
+2
+```
+
+B.
+```
+99
+0
+false
+2
+```
+
+C.
+```
+99
+7
+false
+2
+```
+
+D.
+```
+99
+7
+true
+3
+```
+
+E. コンパイルエラーが発生する
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+**実施記録**
+
+回答：A
+正解：A
+迷ったポイント：なし
+
+---
+
+<a id="q12-1"></a>
+## 問題12-1
+
+**要点**
+
+- `int[3][]`のように、外側の次元だけサイズを指定し内側を空にすると、各行の長さが異なってもよい配列(ジャグ配列/ギザギザ配列)を作れる
+- `new int[3][]`の時点では外側配列は長さ3で確保されるが、各要素(内側配列への参照)はまだ`null`。各行は個別に`array[i] = new int[N]`で後から好きな長さで確保できる
+- 各行のサイズはバラバラでよい(必ずしも長方形である必要はない)。各行の`.length`はそれぞれの行ごとに独立している
+- 未代入の要素は`int`型のデフォルト値`0`で初期化される
+
+次のコードを実行した結果として正しいものを1つ選んでください。
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        int[][] array = new int[3][];
+        array[0] = new int[1];
+        array[1] = new int[2];
+        array[2] = new int[3];
+        array[0][0] = 100;
+        array[2][2] = 200;
+        System.out.println("array[1][1] : " + array[1][1]);
+        System.out.println("array[1].length : " + array[1].length);
+        System.out.println("array[2].length : " + array[2].length);
+    }
+}
+```
+
+A. `array[1][1] : 0`、`array[1].length : 2`、`array[2].length : 3`が出力される
+
+B. `array[1][1] : 200`、`array[1].length : 3`、`array[2].length : 3`が出力される
+
+C. `array[1]`と`array[2]`は同じ長さでないため`ArrayIndexOutOfBoundsException`が発生する
+
+D. `new int[3][]`の時点でコンパイルエラーになる(内側のサイズが未指定のため)
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+**実施記録**
+
+回答：A
+正解：A
+迷ったポイント：なし
+
+---
+
+<a id="q13-1"></a>
+## 問題13-1
+
+**要点**
+
+- `main`メソッドの`String[] args`は、コマンドライン引数を格納する配列。実行時に渡された引数の個数だけ要素が入る
+- 引数を1つも渡さずに実行すると、`args`は`null`ではなく長さ0の配列になる(`args.length == 0`)
+- そのため、引数を渡さずに`args[0]`にアクセスすると`NullPointerException`ではなく`ArrayIndexOutOfBoundsException`が発生する
+- コンパイル時には引数の個数はチェックされない(実行時に決まる話なのでコンパイルエラーにはならない)
+
+次のコードを、コマンドライン引数を何も渡さずに実行した結果として正しいものを1つ選んでください。
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Hello " + args[0] + "!");
+    }
+}
+```
+
+A. `Hello null!`と出力される
+
+B. コンパイルエラーになる
+
+C. `NullPointerException`が発生する
+
+D. `ArrayIndexOutOfBoundsException`が発生する
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+**実施記録**
+
+回答：D
+正解：D
+迷ったポイント：なし
+
+---
+
+<a id="q14-1"></a>
+## 問題14-1
+
+**要点（chap2/14 由来）**
+
+- `String`は不変（イミュータブル）。`s1.replace(...)`は`s1`自身を書き換えるのではなく、**置換後の新しい`String`オブジェクトを返す**だけ（`s1`は変化しない）。
+- `substring(begin, end)`は**begin以上end未満**（endは含まない）の範囲を返す。`substring(0, 5)`なら添字0〜4の5文字（"Java Language"の場合は`"Java "`、末尾に空白を含む）。
+- `indexOf("a")`は、文字列中に複数「a」があっても**最初に見つかった位置**のインデックスを返す。
+- `length()`は**メソッド**であり、配列の`.length`（フィールド）とは違って`()`が必要。`s1.length`（括弧なし）と書くとコンパイルエラーになる（実際に検証済み）。
+- `String`のインデックスも配列と同様に0から始まる。
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        String s1 = "Java Language";
+        String s2 = s1.replace("Language", "VM");
+        System.out.println("s1: " + s1);
+        System.out.println("s2: " + s2);
+        System.out.println("s1.substring(0, 5): "
+                                         + s1.substring(0, 5));
+        System.out.println("s1.indexOf(\"a\"):" + s1.indexOf("a"));
+        System.out.println("s1.length(): " + s1.length());
+    }
+}
+```
+
+`String`の基礎知識として、**正しいものを全て**選んでください。
+
+A. `s1.replace(...)` は `s1` 自身の中身を書き換えるのではなく、置換後の新しい `String` オブジェクトを返す（`s1` は変化しない）
+
+B. `substring(0, 5)` は「0文字目から5文字目まで」を含む6文字を返す
+
+C. `indexOf("a")` は、文字列中に複数「a」があっても、最初に見つかった位置のインデックスを返す
+
+D. `length()` は配列の `.length` と同じくフィールドとしてアクセスする（`s1.length` と書く）
+
+E. `String` のインデックスは配列と同様に0から始まる
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+**実施記録**
+
+回答：C, E
+正解：A, C, E
+迷ったポイント：Aを見落とし、さらにs1/s2どちらが変化するか逆に理解していた（s1が変化してs2が元の文字列を持つと誤認）。正しくはStringの不変性によりs1は変化せず、置換後の新オブジェクトをs2が受け取る。
+
+---
+
+<a id="q26"></a>
+## 問題26
+
+**要点（chap2/7 由来）**
+
+- `char a = 'a' + 1;` の右辺は`char`と`int`リテラルのコンパイル時定数式であり、結果（98）が`char`の範囲に収まるため、キャストなしでも`char`変数への代入が許される。
+- `char`と`int`の演算（`a + i`）は、二項数値昇格により結果の型が`int`になる。`var`はこの昇格後の型（`int`）を推論する——`char`ではない。
+- `System.out.println(char型 + int型)`のように、`char`が算術演算子（`+`）のオペランドになると、その時点で`int`に昇格されるため、出力されるのは文字ではなく整数値になる（`println(char)`という文字そのものを出力するオーバーロードは、`char`単体を渡した場合にしか使われない）。
+- `(char)`キャストで明示的に戻せば、再び文字として出力される。
+
+次のコードを実行したときの出力として正しいものを1つ選んでください。
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        char a = 'a' + 1;
+        int i = 1;
+        var transform = a + i;
+        int transform_i = a + i;
+        char transform_a = (char) (a + i);
+        System.out.println(a + 1);
+        System.out.println(transform);
+        System.out.println(transform_i);
+        System.out.println(transform_a);
+    }
+}
+```
+
+A.
+```
+b
+99
+99
+c
+```
+
+B.
+```
+99
+99
+99
+c
+```
+
+C.
+```
+99
+c
+99
+c
+```
+
+D.
+```
+b
+c
+c
+c
+```
+
+E. コンパイルエラーが発生する（`var transform = a + i;` の型が曖昧なため）
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+**実施記録**
+
+回答：
+正解：B
+迷ったポイント：
 
 ---
 
