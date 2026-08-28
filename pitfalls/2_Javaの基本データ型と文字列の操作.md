@@ -44,6 +44,25 @@ Exception in thread "main" java.lang.NegativeArraySizeException: -1
 
 ---
 
+<a id="pitfall-empty-string-vs-unassigned-array-element-both-length-related-but-different"></a>
+## 5. 「空文字列」と「未代入の配列要素」は、どちらも“空っぽ”に見えるが中身が全く違う
+
+問題ex5-1／ex5-2（2周目オリジナル）関連。
+
+```java
+String s1 = "";              // 明示的に「0文字の文字列」を代入した状態
+System.out.println("[" + s1 + "]");   // → []（中身はある。0文字なだけ）
+
+String[] s2 = new String[1];
+System.out.println(Arrays.toString(s2)); // → [null]（要素はまだ何も代入されていない）
+```
+
+`s1`は「自分で空の文字列を作って代入した」状態で、`s1 == null`は`false`、`s1.length()`は`0`。一方`s2[0]`は配列生成直後でまだ何も代入していない要素なので、参照型のデフォルト値である`null`のままになる（[[pitfall-array-negative-size-compiles-but-throws-at-runtime|関連: 配列要素のデフォルト値]]と同じ「未代入＝デフォルト値」の話）。「空文字列」と「null」はどちらも“見た目には何も表示されない/空っぽ”という印象を与えがちだが、`""`は有効なStringオブジェクト（中身が0文字なだけ）であり、`null`は「オブジェクトそのものが存在しない」という全く別の状態——両者を混同して「配列の要素も自動的に空文字列`""`になる」と考えると誤り。
+
+また、空文字列であっても通常の`String`比較ルールがそのまま適用される点にも注意：`new String("")`はリテラルの`""`とは別オブジェクトになる（`==`は`false`、`.equals()`は`true`）、`"" + ""`のようなリテラル同士のコンパイル時連結は定数畳み込みされて文字列プールに入る（`==`も`true`）——中身が空でも、通常の非空文字列と同じ生成元によるプール/非プールの区別がそのまま効く。
+
+---
+
 <a id="pitfall-textblock-linecontinuation-backslash-joins-with-next-line"></a>
 ## 2. テキストブロックの行末`\`は「次の行」と結合する——「前の行」ではない
 
