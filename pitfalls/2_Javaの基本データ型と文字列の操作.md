@@ -23,6 +23,27 @@ String c = """
 
 ---
 
+<a id="pitfall-array-negative-size-compiles-but-throws-at-runtime"></a>
+## 4. 配列のサイズに負の値を指定してもコンパイルは通る——失敗するのは実行時
+
+問題10-1（2周目オリジナル）関連。
+
+```java
+var arr = new int[0];   // OK：生成できる。要素0個の「空配列」（有効なオブジェクト、nullではない）
+var arr2 = new int[-1]; // コンパイルは通る。しかし実行時に例外が発生する
+```
+
+`new int[-1]`は**コンパイルエラーにならない**（サイズは実行時に評価される値として扱われるため、コンパイラは負数かどうかをチェックしない）。実際に失敗するのは**実行時**で、`NegativeArraySizeException`がスローされ、配列オブジェクト自体の生成に失敗する。
+
+```
+Exception in thread "main" java.lang.NegativeArraySizeException: -1
+	at Neg.main(Neg.java:3)
+```
+
+「サイズ0」と「サイズ負」を混同しないこと：`0`は生成に成功する有効なサイズ（空配列）だが、負の値は生成そのものが（実行時に）失敗する。「配列サイズの妥当性チェックはコンパイル時ではなく実行時に行われる」という点も、コンパイルエラーだと思い込みやすいので要注意。
+
+---
+
 <a id="pitfall-textblock-linecontinuation-backslash-joins-with-next-line"></a>
 ## 2. テキストブロックの行末`\`は「次の行」と結合する——「前の行」ではない
 

@@ -57,6 +57,11 @@
 - [問題12-1](#q12-1)
 - [問題13-1](#q13-1)
 - [問題14-1](#q14-1)
+- [問題14-2](#q14-2)
+- [問題14-α](#q14-alpha)
+- [問題14-β](#q14-beta)
+- [問題14-3](#q14-3)
+- [問題14-4](#q14-4)
 - [問題26](#q26)
 - [参考：進数変換の計算方法](#ref-conversion)
 
@@ -3266,6 +3271,249 @@ E. `String` のインデックスは配列と同様に0から始まる
 回答：C, E
 正解：A, C, E
 迷ったポイント：Aを見落とし、さらにs1/s2どちらが変化するか逆に理解していた（s1が変化してs2が元の文字列を持つと誤認）。正しくはStringの不変性によりs1は変化せず、置換後の新オブジェクトをs2が受け取る。
+
+---
+
+<a id="q14-2"></a>
+## 問題14-2
+
+**要点（chap2/14 由来）**
+
+- `replace(a, b)` は文字列中に`a`が複数回登場する場合、**全ての出現箇所**を置換する（最初の1回だけではない）。
+- `indexOf(...)` は指定した文字列が見つからない場合、例外を投げずに **`-1`** を返す。
+- `substring(begin, end)` に文字列の長さを超える範囲を指定すると、**コンパイルは通り**、実行時に `StringIndexOutOfBoundsException` が発生する（コンパイルエラーではない）。
+- `substring(beginIndex)` のように引数を1つだけ渡すと、`beginIndex`から文字列の末尾までを返す。
+- `substring(begin, end)` で開始と終了が同じ値の場合、エラーにはならず**空文字列 `""`** が返される。
+
+次のうち、**正しいものを全て**選んでください。
+
+A. `s1.replace("Language", "VM")` は、`s1`内に"Language"が複数回登場する場合、最初の1回だけを置換する
+
+B. `"abc".indexOf("z")` のように、指定した文字列が見つからない場合は `-1` を返す（例外は発生しない）
+
+C. `s1.substring(20, 25)` のように、文字列の長さを超える範囲を指定すると、コンパイルエラーになる
+
+D. `substring(int beginIndex)` のように引数を1つだけ渡すと、`beginIndex`から文字列の末尾までを返す
+
+E. `s1.substring(5, 5)` のように開始と終了が同じ値の場合、空文字列 `""` が返される（エラーにはならない）
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+**実施記録**
+
+回答：B, C, E
+正解：B, D, E
+迷ったポイント：Cを誤って含めた（substring範囲外はコンパイルエラーではなく実行時のStringIndexOutOfBoundsException）。Dを見落とした（引数1つのsubstringは末尾までを返す）。
+
+---
+
+<a id="q14-alpha"></a>
+## 問題14-α
+
+**要点（Silverでよく出る基本Stringメソッド）**
+
+- `charAt(int index)`は指定インデックスの文字を`char`で返す。範囲外を指定すると**コンパイルは通り**、実行時に`StringIndexOutOfBoundsException`が発生する。
+- `equalsIgnoreCase()`は大文字小文字を区別せず内容を比較する。
+- `compareTo()`は等しければ`0`、辞書順で自分が前なら負の値、後なら正の値を返す（検証: `"abc".compareTo("abc")`=0, `"abc".compareTo("abd")`=-1, `"abd".compareTo("abc")`=1）。
+- `concat()`は`String`の不変性に従い、**元の文字列は変化せず**、結合済みの新しい`String`を返す（検証: `s1`="abc"のまま、`s2`="abcdef"）。
+- `isEmpty()`は**長さが0かどうか**だけを見る。空白のみの文字列（`"   "`）は長さ0ではないので`isEmpty()`は`false`（空白除去まで見るのは`isBlank()`の方で、こちらは`true`）。
+- `startsWith()`・`endsWith()`はそれぞれ先頭・末尾が指定文字列と一致するかを判定する。
+
+次のうち、**正しいものを全て**選んでください。
+
+A. `charAt(int index)` は指定したインデックスの文字を `char` 型で返す。範囲外を指定すると実行時に例外が発生する（コンパイルエラーではない）
+
+B. `equalsIgnoreCase()` は大文字小文字を区別せずに文字列の内容を比較する
+
+C. `compareTo()` は文字列が等しい場合は `0` を返し、辞書順で前にある場合は負の値、後にある場合は正の値を返す
+
+D. `concat()` は元の文字列を書き換えて結合する（`String`の不変性の例外にあたる）
+
+E. `trim()` は文字列の前後の空白文字を除去した新しい文字列を返す（元の文字列は変化しない）
+
+F. `isEmpty()` は文字列が空白のみで構成されている場合も `true` と判定する（例: `"   "`）
+
+G. `startsWith()`・`endsWith()` は、それぞれ文字列の先頭・末尾が指定した文字列と一致するかを判定する
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+**実施記録**
+
+回答：A, B, C, E, F, G
+正解：A, B, C, E, G
+迷ったポイント：Fを誤って含めた。isEmpty()は長さ0かどうかのみ判定するため、空白のみの文字列（長さ>0）ではfalseになる。空白除去まで考慮してtrueになるのはisBlank()の方で、両者を混同していた。
+
+---
+
+<a id="q14-beta"></a>
+## 問題14-β
+
+**要点（Silverでよく出る基本Stringメソッド・難題編）**
+
+- `compareTo()`は「等しければ0、違えば±1」という単純な符号だけではなく、**最初に異なる文字のUnicodeコード差**（または一方が他方の接頭辞なら長さの差）をそのまま返す。検証: `"a".compareTo("z")`=**-25**、`"Apple".compareTo("apple")`=**-32**（大文字'A'は小文字'a'よりコード値が32小さい）、`"abc".compareTo("ab")`=**1**（長さの差）。
+- `concat(null)`は`null`を渡すと、**実行時に`NullPointerException`が発生する**（何もせず元の文字列を返す、ではない）。
+- `equalsIgnoreCase(null)`は`null`を渡しても例外を投げず、単に`false`を返す（`concat`とは対照的）。
+- `charAt(-1)`のような負のインデックスも、範囲外の正のインデックスと同じ`StringIndexOutOfBoundsException`が実行時に発生する（コンパイルエラーではない）。
+
+次のうち、**正しいものを全て**選んでください。
+
+A. `compareTo()` は、文字列の内容が異なる場合、必ず `-1` か `1` のどちらかを返す（この2つの値以外はあり得ない）
+
+B. `"Apple".compareTo("apple")` のように大文字小文字が異なる文字列を比較すると、Unicodeコードの差に基づいた値が返る（大文字は小文字よりコード値が小さいため、この場合は負の値になる）
+
+C. `s1.concat(null)` は、`null` を渡しても実行時に例外は発生せず、単に何も連結されずに元の文字列がそのまま返る
+
+D. `s1.equalsIgnoreCase(null)` は、`null` を渡しても例外を投げず `false` を返す
+
+E. `charAt(-1)` のように負のインデックスを指定した場合も、`charAt(範囲外の正の値)` と同じ `StringIndexOutOfBoundsException` が発生する
+
+F. `"abc".compareTo("ab")` のように、一方がもう一方の完全な接頭辞（prefix）になっている場合、短い文字列の長さと長い文字列の長さの差が返り値になる
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+**実施記録**
+
+回答：B, D, E, F
+正解：B, D, E, F
+迷ったポイント：なし
+
+---
+
+<a id="q14-3"></a>
+## 問題14-3
+
+**要点（chap2/14 由来）**
+
+- `String`は不変。`replace(...)`は新しいオブジェクトを返すだけで`s1`自身は変化しない。
+- `substring(begin, end)`はbegin以上end未満。
+- `indexOf(...)`は最初に見つかった位置を返す。
+- `length()`はメソッド。
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        String s1 = "Programming Language";
+        String s2 = s1.replace("Language", "Test");
+        System.out.println(s1);
+        System.out.println(s2);
+        System.out.println(s1.substring(4, 11));
+        System.out.println(s1.indexOf("g"));
+        System.out.println(s1.length());
+    }
+}
+```
+
+このコードを実行した結果として正しいものを1つ選んでください。
+
+A.
+```
+Programming Language
+Programming Test
+ramming
+3
+20
+```
+
+B.
+```
+Programming Test
+Programming Test
+ramming
+3
+20
+```
+
+C.
+```
+Programming Language
+Programming Test
+rammin
+3
+20
+```
+
+D.
+```
+Programming Language
+Programming Test
+ramming
+10
+20
+```
+
+E. 実行時に例外が発生する
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+**実施記録**
+
+回答：A
+正解：A
+迷ったポイント：なし
+
+---
+
+<a id="q14-4"></a>
+## 問題14-4
+
+**要点（chap2/14 由来）**
+
+- `indexOf(str, fromIndex)`は、`fromIndex`以降の位置から探索を開始して最初に見つかった位置を返す（2引数オーバーロード）。
+- `substring(begin, end)`は、対象の文字列（この場合は`substring`で切り出した短い文字列）の長さを超える`end`を指定すると、**コンパイルは通り**実行時に`StringIndexOutOfBoundsException`が発生する。
+- 例外が発生した行の`println`自体は実行されない（引数の評価中に例外が飛ぶため）。ただし、それより前の`println`はすでに実行済みなので、そこまでの出力は残る。
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        String s1 = "banana bread";
+        int firstA = s1.indexOf("a");
+        int secondA = s1.indexOf("a", firstA + 1);
+        System.out.println(firstA + "," + secondA);
+        String mid = s1.substring(firstA, secondA);
+        System.out.println(mid);
+        System.out.println(mid.substring(0, 10));
+    }
+}
+```
+
+このコードを実行した結果として正しいものを1つ選んでください。
+
+A.
+```
+1,3
+an
+```
+に続けて実行時に `StringIndexOutOfBoundsException` が発生する
+
+B.
+```
+1,3
+an
+anananana
+```
+
+C.
+```
+1,5
+an
+```
+に続けて実行時に `StringIndexOutOfBoundsException` が発生する
+
+D. コンパイルエラーが発生する
+
+E.
+```
+1,3
+```
+のみ出力され、以降は何も起きずプログラムが正常終了する（例外は発生しない）
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+**実施記録**
+
+回答：A
+正解：A
+迷ったポイント：なし
 
 ---
 
