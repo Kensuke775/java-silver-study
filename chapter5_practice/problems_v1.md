@@ -34,10 +34,9 @@
 - [問題16-2](#q16-2)
 - [問題17-1](#q17-1)
 - [問題17-2](#q17-2)
-- [問題ex18-1](#qex18-1)
-- [問題ex18-2](#qex18-2)
 
-<a id="q1-1"></a>
+
+
 ## 問題1-1
 
 ```java
@@ -70,7 +69,27 @@ C. コンパイルエラーになる
 
 D. NullPointerExceptionがスローされる
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
 
 **実施記録**
 
@@ -80,7 +99,8 @@ D. NullPointerExceptionがスローされる
 
 ---
 
-<a id="q1-2"></a>
+
+
 ## 問題1-2
 
 ```java
@@ -117,7 +137,27 @@ C. item1 : Sweater / item2 : Sweater
 
 D. コンパイルエラーになる
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
 
 **実施記録**
 
@@ -127,7 +167,8 @@ D. コンパイルエラーになる
 
 ---
 
-<a id="q3-1"></a>
+
+
 ## 問題3-1
 
 ```java
@@ -141,6 +182,7 @@ class Item {
     }
 }
 ```
+
 ```java
 Item item1 = new Item();
 item1.name = "Sweater";
@@ -156,7 +198,27 @@ C. 実行時に`IllegalAccessException`がスローされる
 
 D. "Sweater"は設定されるが、`getName()`を呼ぶと`null`が返る
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
 
 **実施記録**
 
@@ -166,7 +228,8 @@ D. "Sweater"は設定されるが、`getName()`を呼ぶと`null`が返る
 
 ---
 
-<a id="q3-2"></a>
+
+
 ## 問題3-2
 
 ```java
@@ -180,6 +243,7 @@ class Item {
     }
 }
 ```
+
 ```java
 Item item1 = new Item();
 Item item2 = new Item();
@@ -201,7 +265,27 @@ C. `item1 : null` / `itme2 : null`
 
 D. コンパイルエラーになる
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
 
 **実施記録**
 
@@ -211,7 +295,8 @@ D. コンパイルエラーになる
 
 ---
 
-<a id="q4-1"></a>
+
+
 ## 問題4-1
 
 ```java
@@ -242,7 +327,27 @@ C. item : null / true
 
 D. item : / true
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
 
 **実施記録**
 
@@ -252,7 +357,8 @@ D. item : / true
 
 ---
 
-<a id="q4-2"></a>
+
+
 ## 問題4-2
 
 ```java
@@ -286,7 +392,27 @@ C. false / true / true
 
 D. true / false / false
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
 
 **実施記録**
 
@@ -296,10 +422,12 @@ D. true / false / false
 
 ---
 
-<a id="q5-1"></a>
+
+
 ## 問題5-1
 
 `com/Item.java`(パッケージ`com`):
+
 ```java
 package com;
 
@@ -315,6 +443,7 @@ public class Item {
 ```
 
 `Main.java`(デフォルトパッケージ、`com`とは別ディレクトリ):
+
 ```java
 import com.Item;
 
@@ -336,7 +465,27 @@ C. `item.getName()`の行でコンパイルエラーになる
 
 D. 実行時に`IllegalAccessError`がスローされる
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
 
 **実施記録**
 
@@ -346,10 +495,12 @@ D. 実行時に`IllegalAccessError`がスローされる
 
 ---
 
-<a id="q5-2"></a>
+
+
 ## 問題5-2
 
 `com/Item.java`(パッケージ`com`):
+
 ```java
 package com;
 
@@ -365,6 +516,7 @@ public class Item {
 ```
 
 `Main.java`(デフォルトパッケージ、`com`とは別ディレクトリ):
+
 ```java
 class Main {
     public static void main(String[] args) {
@@ -385,7 +537,27 @@ C. `null`が出力される
 
 D. 実行時に`ClassNotFoundException`がスローされる
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
 
 **実施記録**
 
@@ -395,7 +567,8 @@ D. 実行時に`ClassNotFoundException`がスローされる
 
 ---
 
-<a id="q6-1"></a>
+
+
 ## 問題6-1
 
 ```java
@@ -429,7 +602,27 @@ C. 実行時に例外がスローされる
 
 D. item : T-shirt とだけ表示される
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
 
 **実施記録**
 
@@ -439,7 +632,8 @@ D. item : T-shirt とだけ表示される
 
 ---
 
-<a id="q6-2"></a>
+
+
 ## 問題6-2
 
 ```java
@@ -473,7 +667,27 @@ C. false
 
 D. NullPointerExceptionがスローされる
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
 
 **実施記録**
 
@@ -483,7 +697,8 @@ D. NullPointerExceptionがスローされる
 
 ---
 
-<a id="q7-1"></a>
+
+
 ## 問題7-1
 
 ```java
@@ -506,7 +721,27 @@ C. コンパイルエラーになる(引数名`item`が予約語として扱わ�
 
 D. 実行時に例外がスローされる
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
 
 **実施記録**
 
@@ -516,7 +751,8 @@ D. 実行時に例外がスローされる
 
 ---
 
-<a id="q7-2"></a>
+
+
 ## 問題7-2
 
 ```java
@@ -539,7 +775,27 @@ C. `boolean`から`void`への変更自体が許可されないためコンパ�
 
 D. コンパイルエラーになる(引数の型が同じで戻り値だけ異なるメソッドは区別されない)
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
 
 **実施記録**
 
@@ -549,7 +805,8 @@ D. コンパイルエラーになる(引数の型が同じで戻り値だけ異�
 
 ---
 
-<a id="q8-1"></a>
+
+
 ## 問題8-1
 
 ```java
@@ -586,13 +843,33 @@ public class Main {
 
 A. 何も出力されない
 
-B. ` Item : T-shirt `(前後に半角スペース)が2回出力される
+B. `Item : T-shirt`(前後に半角スペース)が2回出力される
 
 C. `# Item : T-shirt #`が2回出力される
 
 D. 1回目は何も出力されず、2回目は`# Item : T-shirt #`が出力される
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
 
 **実施記録**
 
@@ -602,7 +879,8 @@ D. 1回目は何も出力されず、2回目は`# Item : T-shirt #`が出力さ�
 
 ---
 
-<a id="q8-2"></a>
+
+
 ## 問題8-2
 
 ```java
@@ -642,9 +920,29 @@ B. `null Item : T-shirt null`
 
 C. `NullPointerException`がスローされる
 
-D. ` Item : T-shirt `(markの部分は何も表示されない)
+D. `Item : T-shirt`(markの部分は何も表示されない)
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
 
 **実施記録**
 
@@ -654,7 +952,8 @@ D. ` Item : T-shirt `(markの部分は何も表示されない)
 
 ---
 
-<a id="q9-1"></a>
+
+
 ## 問題9-1
 
 ```java
@@ -677,7 +976,27 @@ C. コンパイルエラーになる(同じ型の可変長引数を複数のメ�
 
 D. 実行時に例外がスローされる
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
 
 **実施記録**
 
@@ -687,7 +1006,8 @@ D. 実行時に例外がスローされる
 
 ---
 
-<a id="q9-2"></a>
+
+
 ## 問題9-2
 
 ```java
@@ -716,9 +1036,29 @@ B. 実行時に`NoSuchMethodError`がスローされる
 
 C. `method(int i, int... j) : 100:200`が出力される
 
-D. `method(char... c) : `の呼び出しとして解釈され、文字化けした出力になる
+D. `method(char... c) :` の呼び出しとして解釈され、文字化けした出力になる
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
 
 **実施記録**
 
@@ -728,7 +1068,8 @@ D. `method(char... c) : `の呼び出しとして解釈され、文字化けし�
 
 ---
 
-<a id="q10-1"></a>
+
+
 ## 問題10-1
 
 ```java
@@ -757,7 +1098,27 @@ C. `int... : 100`(可変長引数が優先される)
 
 D. `int : 100`(完全に型が一致するメソッドが最優先される)
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
 
 **実施記録**
 
@@ -767,7 +1128,8 @@ D. `int : 100`(完全に型が一致するメソッドが最優先される)
 
 ---
 
-<a id="q10-2"></a>
+
+
 ## 問題10-2
 
 ```java
@@ -794,7 +1156,27 @@ C. コンパイルエラーになる(floatとdoubleのどちらのメソッド�
 
 D. `long : 100`が出力される(内部的に自動でlong型が生成されるため)
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
 
 **実施記録**
 
@@ -804,7 +1186,8 @@ D. `long : 100`が出力される(内部的に自動でlong型が生成される
 
 ---
 
-<a id="q11-1"></a>
+
+
 ## 問題11-1
 
 ```java
@@ -835,7 +1218,27 @@ C. NullPointerExceptionがスローされる
 
 D. Item id: name: が出力される(idもnameも空)
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
 
 **実施記録**
 
@@ -845,7 +1248,8 @@ D. Item id: name: が出力される(idもnameも空)
 
 ---
 
-<a id="q11-2"></a>
+
+
 ## 問題11-2
 
 ```java
@@ -880,7 +1284,27 @@ C. コンパイルエラーになる
 
 D. スタックオーバーフローで実行時エラーになる
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
 
 **実施記録**
 
@@ -890,7 +1314,8 @@ D. スタックオーバーフローで実行時エラーになる
 
 ---
 
-<a id="q13-1"></a>
+
+
 ## 問題13-1
 
 ```java
@@ -926,7 +1351,27 @@ C. コンパイルエラーになる(s1.commonValueへの代入が不正)
 
 D. static common value : 999 / static common value : 500 / false
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
 
 **実施記録**
 
@@ -936,7 +1381,8 @@ D. static common value : 999 / static common value : 500 / false
 
 ---
 
-<a id="q13-2"></a>
+
+
 ## 問題13-2
 
 ```java
@@ -966,7 +1412,27 @@ C. 問題なくコンパイルされ、value=0, commonValue=500 が出力され�
 
 D. valueの行だけコンパイルエラーになり、commonValueの行はコンパイルされる
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
 
 **実施記録**
 
@@ -976,7 +1442,8 @@ D. valueの行だけコンパイルエラーになり、commonValueの行はコ�
 
 ---
 
-<a id="q12-1"></a>
+
+
 ## 問題12-1
 
 ```java
@@ -1010,7 +1477,27 @@ C. コンパイルエラーになる(`this()`呼び出しはコンストラク�
 
 D. コンパイルエラーになる(`this()`は`Item()`コンストラクタ内で2回以上呼び出せないため)
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
 
 **実施記録**
 
@@ -1020,7 +1507,8 @@ D. コンパイルエラーになる(`this()`は`Item()`コンストラクタ内
 
 ---
 
-<a id="q12-2"></a>
+
+
 ## 問題12-2
 
 ```java
@@ -1054,7 +1542,27 @@ C. コンパイルエラーになる(`this()`は1つのクラスに付き1回し
 
 D. コンパイルエラーになる(コンストラクタ同士が循環して呼び出し合っている)
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
 
 **実施記録**
 
@@ -1064,7 +1572,8 @@ D. コンパイルエラーになる(コンストラクタ同士が循環して�
 
 ---
 
-<a id="q14-1"></a>
+
+
 ## 問題14-1
 
 ```java
@@ -1103,7 +1612,27 @@ C. static Initializer... num : 100 / static Initializer... Main / Initializer...
 
 D. static Initializer... Main / Initializer... s : Test / Constructor... s : A / static Initializer... num : 100 / Initializer... s : Test / Constructor... s : B
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
 
 **実施記録**
 
@@ -1113,7 +1642,8 @@ D. static Initializer... Main / Initializer... s : Test / Constructor... s : A /
 
 ---
 
-<a id="q14-2"></a>
+
+
 ## 問題14-2
 
 ```java
@@ -1150,7 +1680,27 @@ C. Initializer... s : Test / static Initializer... num : 100 / Constructor... s 
 
 D. NullPointerExceptionがスローされる
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
 
 **実施記録**
 
@@ -1160,7 +1710,8 @@ D. NullPointerExceptionがスローされる
 
 ---
 
-<a id="q15-1"></a>
+
+
 ## 問題15-1
 
 ```java
@@ -1191,7 +1742,27 @@ C. `val3[0] : 400` / `val1[0] : 100` / `val2[0] : 200`
 
 D. `val3[0] : 200` / `val1[0] : 200` / `val2[0] : 200`
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
 
 **実施記録**
 
@@ -1201,7 +1772,8 @@ D. `val3[0] : 200` / `val1[0] : 200` / `val2[0] : 200`
 
 ---
 
-<a id="q15-2"></a>
+
+
 ## 問題15-2
 
 ```java
@@ -1232,7 +1804,27 @@ C. `val3[0] : 999` / `val1[0] : 200` / `val2[0] : 200`
 
 D. コンパイルエラーになる(メソッド内でパラメータに新しい配列を代入することはできないため)
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
 
 **実施記録**
 
@@ -1242,7 +1834,8 @@ D. コンパイルエラーになる(メソッド内でパラメータに新し�
 
 ---
 
-<a id="q16-1"></a>
+
+
 ## 問題16-1
 
 ```java
@@ -1273,7 +1866,27 @@ C. methodB() ary : [100, 5, 9] / main() array : [1, 5, 3]
 
 D. methodB() ary : [100, 9, 9] / main() array : [1, 2, 3]
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
 
 **実施記録**
 
@@ -1283,7 +1896,8 @@ D. methodB() ary : [100, 9, 9] / main() array : [1, 2, 3]
 
 ---
 
-<a id="q16-2"></a>
+
+
 ## 問題16-2
 
 ```java
@@ -1316,7 +1930,27 @@ C. methodB() ary : [99, 2, 3] / main() array : [1, 2, 3]
 
 D. methodB() ary : [0, 0, 0] / main() array : [99, 2, 3]
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
 
 **実施記録**
 
@@ -1326,7 +1960,8 @@ D. methodB() ary : [0, 0, 0] / main() array : [99, 2, 3]
 
 ---
 
-<a id="q17-1"></a>
+
+
 ## 問題17-1
 
 ```java
@@ -1357,7 +1992,27 @@ C. `item1, item2 : T-shirt, Jeans` / `item1 == item2 : true`
 
 D. `item1, item2 : T-shirt, Jeans` / `item1 == item2 : false`
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
 
 **実施記録**
 
@@ -1367,7 +2022,8 @@ D. `item1, item2 : T-shirt, Jeans` / `item1 == item2 : false`
 
 ---
 
-<a id="q17-2"></a>
+
+
 ## 問題17-2
 
 ```java
@@ -1395,95 +2051,32 @@ C. `item1.equals(item3) : true` / `item1.name.equals(item3.name) : false`
 
 D. `item1.equals(item3) : false` / `item1.name.equals(item3.name) : false`
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
 
 **実施記録**
 
 回答：A
 正解：A
-迷ったポイント：なし
-
----
-
-<a id="qex18-1"></a>
-## 問題ex18-1
-
-```java
-public class Main {
-    public static void main(String[] args) {
-        Item obj1 = new Item();
-        Item obj2 = new Item();
-        Item[] arr = new Item[1];
-        arr[0] = obj1;
-        obj1 = null;
-        method(obj2);
-        obj2 = new Item();
-        arr = null;
-        // ここまで実行した時点
-    }
-    public static void method(Item obj) {
-        obj = new Item();
-    }
-}
-class Item {}
-```
-
-この時点(コメント行)で、GCの対象になっているItem型のインスタンスはいくつか。
-
-A. 1個
-
-B. 2個
-
-C. 3個
-
-D. 4個
-
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-
-**実施記録**
-
-回答：D
-正解：C
-迷ったポイント：配列要素経由の間接参照(arr[0]=obj1)がある間はAがGC対象にならず、arr自体がnullになった時点で連鎖的に対象になる、という間接参照のタイミングを数え間違えた
-
----
-
-<a id="qex18-2"></a>
-## 問題ex18-2
-
-```java
-class Node {
-    Node next;
-}
-public class Main {
-    public static void main(String[] args) {
-        Node n1 = new Node();
-        Node n2 = new Node();
-        n1.next = n2;
-        n2.next = n1;
-        n1 = null;
-        n2 = null;
-        // ここまで実行した時点
-    }
-}
-```
-
-この時点(コメント行)で、GCの対象になっているNode型のインスタンスはいくつか。
-
-A. 0個(お互いを参照し合っているのでGC対象にならない)
-
-B. 1個
-
-C. 2個
-
-D. コンパイルエラーになる
-
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-
-**実施記録**
-
-回答：C
-正解：C
 迷ったポイント：なし
 
 ---
