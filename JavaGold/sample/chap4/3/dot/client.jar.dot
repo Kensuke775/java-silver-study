@@ -1,0 +1,6 @@
+digraph "client" {
+    // Path: c:\sample\chap4\3\mlib\client.jar
+   "app"                                              -> "bar (mody)";
+   "app"                                              -> "foo (modx.foo)";
+   "app"                                              -> "java.lang (java.base)";
+}

@@ -1,0 +1,5 @@
+digraph "summary" {
+  "client"                                           -> "java.base (java.base)";
+  "client"                                           -> "modx.foo";
+  "client"                                           -> "mody";
+}

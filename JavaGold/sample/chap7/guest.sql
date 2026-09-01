@@ -1,0 +1,15 @@
+-- GUEST テーブルが存在する場合は削除
+DROP TABLE GUEST;
+
+-- BOOK テーブルの作成
+CREATE TABLE GUEST (
+    ID INTEGER PRIMARY KEY,
+    FIRSTNAME VARCHAR(20),
+    COUNTRY VARCHAR(20)
+);
+-- データの挿入
+INSERT INTO GUEST VALUES(1, 'Carol', 'USA');
+INSERT INTO GUEST VALUES(2, 'Alberto', 'Spain');
+INSERT INTO GUEST VALUES(3, 'James', 'Canada');
+INSERT INTO GUEST VALUES(4, 'Pierre', 'France');
+INSERT INTO GUEST VALUES(5, 'Sarah', 'Canada');

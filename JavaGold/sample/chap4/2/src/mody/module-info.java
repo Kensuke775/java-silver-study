@@ -1,0 +1,3 @@
+module mody {
+    exports baz;
+}

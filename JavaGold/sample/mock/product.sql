@@ -1,0 +1,15 @@
+-- PRODUCT テーブルが存在する場合は削除
+DROP TABLE PRODUCT;
+
+-- PRODUCT テーブルの作成
+CREATE TABLE PRODUCT (
+    ID INTEGER PRIMARY KEY,
+    NAME VARCHAR(30),
+    CATEGORY VARCHAR(20),
+    PRICE INTEGER
+);
+-- データの挿入
+INSERT INTO PRODUCT VALUES(1, 'Laptop', 'Electronics', 120000);
+INSERT INTO PRODUCT VALUES(2, 'Desk Chair', 'Furniture', 25000);
+INSERT INTO PRODUCT VALUES(3, 'Bookshelf', 'Furniture', 10000);
+INSERT INTO PRODUCT VALUES(4, 'Coffee Maker', 'Appliance', 9000);

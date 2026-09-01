@@ -1,0 +1,7 @@
+digraph "summary" {
+  "com.client"                                       -> "com.api";
+  "com.client"                                       -> "java.base (java.base)";
+  "com.api"                                          -> "java.base (java.base)";
+  "com.service"                                      -> "com.api";
+  "com.service"                                      -> "java.base (java.base)";
+}
