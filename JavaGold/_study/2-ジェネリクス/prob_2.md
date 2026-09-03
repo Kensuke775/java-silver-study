@@ -14,6 +14,15 @@
 - [問題5-2](#問題5-2)
 - [問題6-1](#問題6-1)
 - [問題6-2](#問題6-2)
+- [問題7-1](#問題7-1)
+- [問題7-2](#問題7-2)
+- [問題8-1](#問題8-1)
+- [問題8-2](#問題8-2)
+- [問題9-1](#問題9-1)
+- [問題9-2](#問題9-2)
+- [問題10-1](#問題10-1)
+- [問題10-2](#問題10-2)
+- [問題10-3](#問題10-3)
 
 
 
@@ -492,3 +501,457 @@ D. コンパイルは通るが、実行時に例外がスローされる
 正解: B
 
 あなたの回答: A
+
+<a id="問題7-1"></a>
+## 問題7-1
+
+```java
+1  class Foo<T extends Number> {
+2      T value;
+3      Foo(T value) { this.value = value; }
+4      double doubled() { return value.doubleValue() * 2; }
+5  }
+6  class Bar<T, X extends T> {}
+7  public class Main {
+8      public static void main(String[] args) {
+9          Foo<Integer> f1 = new Foo<>(10);
+10         Foo<String> f2 = new Foo<>("10");
+11         Bar<Number, Integer> b1 = new Bar<>();
+12         Bar<Object, String> b2 = new Bar<>();
+13         System.out.println(f1.doubled());
+14     }
+15 }
+```
+
+このコードをコンパイルするとどうなるか。
+
+A. 10行目のみでコンパイルエラーになる
+B. 10行目と12行目でコンパイルエラーになる
+C. 11行目と12行目でコンパイルエラーになる
+D. すべて問題なくコンパイルできる
+
+**実施記録**
+
+
+
+
+迷ったポイント: `Bar<T, X extends T>`の`T`と、`Foo<T extends Number>`の`T`を同一視し、`Bar`側の`T`にも「Numberでなければならない」という制約が及ぶと誤認していた。型パラメータ名はクラスごとにローカルな名前であり、`Bar`自身は`T`に境界を宣言していない(暗黙に`T extends Object`)ため、`Bar<Object, String>`(12行目)は`X(String)`が`T(Object)`のサブタイプという条件を満たし問題なくコンパイルできる。
+
+
+
+
+解説(概念): 境界`extends Number`は`Foo`というクラスの`T`にのみ有効なローカルな制約で、別クラス`Bar`の同名の型パラメータ`T`には一切継承されない。`Bar<T, X extends T>`で制約があるのは`X`(`T`のサブタイプでなければならない)だけで、`T`自体には境界がないため任意の型を入れられる。10行目`Foo<String>`だけが`Foo`自身の境界`T extends Number`に違反してコンパイルエラーになる。
+
+
+
+
+正解: A
+
+
+
+
+あなたの回答: B
+
+<a id="問題7-2"></a>
+## 問題7-2
+
+```java
+1  class MultiBound<T extends Number & Comparable<T>> {
+2      T value;
+3      MultiBound(T value) { this.value = value; }
+4      int compareToZero(T zero) { return value.compareTo(zero); }
+5  }
+6  public class Main {
+7      public static void main(String[] args) {
+8          MultiBound<Integer> m1 = new MultiBound<>(5);
+9          System.out.println(m1.compareToZero(0));
+10         MultiBound<String> m2 = new MultiBound<>("abc");
+11     }
+12 }
+```
+
+このコードをコンパイルするとどうなるか。
+
+A. すべて問題なくコンパイルできる。実行すると`1`が出力される
+B. 4行目でコンパイルエラーになる
+C. 10行目で実行時に`ClassCastException`がスローされる
+D. 10行目でコンパイルエラーになる
+
+**実施記録**
+
+
+
+
+迷ったポイント: なし(一発正解)。
+
+
+
+
+解説(概念): `T extends Number & Comparable<T>`は「`Number`のサブタイプであること」と「`Comparable<T>`を実装していること」の両方を満たさなければならないAND条件(複数境界)。`String`は`Comparable<String>`は実装しているが`Number`のサブタイプではないため、10行目の時点でこの境界条件に違反しコンパイルエラーになる。なお複数境界を書く場合、クラス(`Number`)は必ず先頭に置き、インタフェース(`Comparable<T>`)はその後に`&`で並べる、という順序の制約もある。
+
+
+
+
+正解: D
+
+
+
+
+あなたの回答: D
+
+<a id="問題8-1"></a>
+## 問題8-1
+
+```java
+1  public class Main {
+2      static <T extends Comparable<T>> void method(T t1, T t2) {
+3          if (t1.compareTo(t2) > 0) System.out.println(t1);
+4      }
+5      public static void main(String[] args) {
+6          method(10, 20);
+7          method(10, 20L);
+8          method("a", "b");
+9      }
+10 }
+```
+
+このコードをコンパイルするとどうなるか。
+
+A. 7行目でコンパイルエラーになる
+B. すべて問題なくコンパイルできる。実行すると何も出力されない
+C. 6,7,8行目すべてでコンパイルエラーになる
+D. 7行目で実行時に例外がスローされる
+
+**実施記録**
+
+
+
+
+迷ったポイント: 仮引数の型が`long`のように固定されている場合はint→longのワイドニングが起きるが、今回の仮引数は型パラメータ`T`(参照型のみを受け付ける箱)であるため、プリミティブは先にオートボクシングされてから`T`にはめ込まれる、という順序を見落としていた。`10`は`Integer`に、`20L`は`Long`にそれぞれ独立にボクシングされ、ワイドニングが介在する余地がない。
+
+
+
+
+解説(概念): `method(T t1, T t2)`は`t1`と`t2`が同じ1つの`T`であることを要求する。`Integer`と`Long`はどちらも`Number`のサブタイプというだけで互いにサブタイプ関係にない「兄弟」同士のため、単一の`T`として推論できず7行目でコンパイルエラーになる(`推論変数Tには、不適合な境界があります: 等価制約 Integer,Long`)。
+
+
+
+
+正解: A
+
+
+
+
+あなたの回答: B
+
+<a id="問題8-2"></a>
+## 問題8-2
+
+```java
+1  public class Main {
+2      static <T> void unboundedMethod(T t1, T t2) {
+3          if (t1.compareTo(t2) > 0) System.out.println(t1);
+4      }
+5      static <T extends Comparable<T>> void boundedMethod(T t1, T t2) {
+6          if (t1.compareTo(t2) > 0) System.out.println(t1);
+7      }
+8      public static void main(String[] args) {
+9          boundedMethod(5, 3);
+10         unboundedMethod(5, 3);
+11     }
+12 }
+```
+
+このコードをコンパイルするとどうなるか。
+
+A. すべて問題なくコンパイルできる
+B. 6行目でコンパイルエラーになる
+C. 3行目でコンパイルエラーになる
+D. 3行目と6行目でコンパイルエラーになる
+
+**実施記録**
+
+
+
+
+迷ったポイント: なし(一発正解)。
+
+
+
+
+解説(概念): 境界なしの`<T>`は暗黙に`T extends Object`であり、`Object`は`compareTo`メソッドを持たないため3行目は`シンボルを見つけられません`でコンパイルエラーになる。一方`<T extends Comparable<T>>`は境界により`compareTo`の存在が保証されるため6行目は問題なくコンパイルできる。
+
+
+
+
+正解: C
+
+
+
+
+あなたの回答: C
+
+<a id="問題9-1"></a>
+## 問題9-1
+
+```java
+1  public class Main {
+2      public static void main(String[] args) {
+3          Number[] nArr = new Integer[3];
+4          nArr[0] = 10;
+5          nArr[1] = 3.14;
+6          System.out.println(nArr[0]);
+7      }
+8  }
+```
+
+このコードを実行するとどうなるか。
+
+A. コンパイルエラーになる
+B. `10`が出力される
+C. 4行目で`ArrayStoreException`がスローされる
+D. 5行目で`ArrayStoreException`がスローされる
+
+**実施記録**
+
+
+
+
+迷ったポイント: なし(一発正解)。
+
+
+
+
+解説(概念): 配列は共変(`Number[] nArr = new Integer[3];`はコンパイルが通る)だが、実体の配列は`Integer`専用のまま。5行目`nArr[1] = 3.14`は静的には`Number`への代入に見えても、JVMは配列に値を格納する瞬間に実体の要素型と実際に格納しようとした値の型を照合しており、`Integer`専用配列に`Double`を入れようとしたことが検出されて`ArrayStoreException`がスローされる。ジェネリクスの`List<Number>`と違い、配列は実行時まで型情報を保持しているためこのチェックが可能。
+
+
+
+
+正解: D
+
+
+
+
+あなたの回答: D
+
+<a id="問題9-2"></a>
+## 問題9-2
+
+```java
+1  import java.util.ArrayList;
+2  import java.util.List;
+3
+4  public class Main {
+5      static void addNull(List<?> list) {
+6          list.add(null);
+7      }
+8      static void printAll(List<? extends Number> list) {
+9          for (Number n : list) System.out.print(n);
+10     }
+11     public static void main(String[] args) {
+12         List<Integer> iList = new ArrayList<>();
+13         iList.add(1);
+14         iList.add(2);
+15         addNull(iList);
+16         printAll(iList);
+17         System.out.println();
+18         System.out.println(iList.size());
+19     }
+20 }
+```
+
+このコードを実行するとどうなるか。
+
+A. `12null` の後に `3` が出力される
+B. コンパイルエラーになる
+C. `12` の後に`NullPointerException`がスローされる
+D. `12` の後に `2` が出力される
+
+**実施記録**
+
+
+
+
+迷ったポイント: なし(一発正解)。
+
+
+
+
+解説(概念): `List<?>`は要素の追加が`null`のみ許可されるため`addNull`は問題なくコンパイル・実行できる。`List<? extends Number>`は実際の要素型が何であれ`Number`として取り出すことが安全に保証されているため、拡張for文で`Number n`として取り出せる。要素が`null`のときも`System.out.print`は`NullPointerException`を投げず文字列`"null"`として出力する。最終的に`iList`には`1, 2, null`の3要素が入っているため`size()`は`3`。
+
+
+
+
+正解: A
+
+
+
+
+あなたの回答: A
+
+<a id="問題10-1"></a>
+## 問題10-1
+
+```java
+1  import java.util.ArrayList;
+2  import java.util.List;
+3
+4  public class Main {
+5      static void testUpperBnd(List<? extends Number> list) {
+6          list.add(null);
+7          Number n = list.get(0);
+8      }
+9      static void testLowerBnd(List<? super Number> list) {
+10         list.add(Integer.valueOf(10));
+11         Object o = list.get(0);
+12     }
+13     public static void main(String[] args) {
+14         List<Object> oList = new ArrayList<>();
+15         List<Integer> iList = new ArrayList<>();
+16         testUpperBnd(oList);
+17         testLowerBnd(iList);
+18     }
+19 }
+```
+
+このコードをコンパイルするとどうなるか。
+
+A. すべて問題なくコンパイルできる
+B. 16行目のみコンパイルエラーになる
+C. 16行目と17行目でコンパイルエラーになる
+D. 17行目のみコンパイルエラーになる
+
+**実施記録**
+
+
+
+
+迷ったポイント: なし(一発正解)。
+
+
+
+
+解説(概念): `testUpperBnd`は`List<? extends Number>`を要求するが、16行目で渡した`List<Object>`は`Object`が`Number`のサブタイプではないため不適合。`testLowerBnd`は`List<? super Number>`を要求するが、17行目で渡した`List<Integer>`は`Integer`が`Number`のスーパータイプではないため不適合。どちらも境界条件に違反しコンパイルエラーになる。
+
+
+
+
+正解: C
+
+
+
+
+あなたの回答: C
+
+<a id="問題10-2"></a>
+## 問題10-2
+
+```java
+1  import java.util.ArrayList;
+2  import java.util.List;
+3
+4  public class Main {
+5      static <T> void copy(List<? super T> dest, List<? extends T> src) {
+6          for (T t : src) dest.add(t);
+7      }
+8      public static void main(String[] args) {
+9          List<Integer> src = new ArrayList<>();
+10         src.add(1); src.add(2);
+11
+12         List<Number> dest = new ArrayList<>();
+13         copy(dest, src);
+14         System.out.println(dest);
+15
+16         List<Integer> dest3 = new ArrayList<>();
+17         List<Number> numSrc = new ArrayList<>();
+18         numSrc.add(1.0);
+19         copy(dest3, numSrc);
+20         System.out.println(dest3);
+21     }
+22 }
+```
+
+このコードをコンパイルするとどうなるか。
+
+A. すべて問題なくコンパイルできる。実行すると`[1, 2]`のみ出力される
+B. 13行目でコンパイルエラーになる
+C. 19行目で実行時に`ClassCastException`がスローされる
+D. 19行目でコンパイルエラーになる
+
+**実施記録**
+
+
+
+
+迷ったポイント: `List<? super T> dest, List<? extends T> src`という2引数から`T`を逆算する際、「`extends`側の実引数(Integer)からT≧Integer、`super`側の実引数(Number)からT≦Number」という不等式の向きを直感と逆に感じ、13行目の方がエラーになると誤認していた。実際は13行目(`T≧Integer`かつ`T≦Number`→T=Integerで両立)は成立し、19行目(`T≧Number`かつ`T≦Integer`→NumberはIntegerより上位なので重なる`T`が存在しない)の方が矛盾する。「`?`が先に決まっていて`T`を逆算する場面では、`extends`→T以上、`super`→T以下、という不等号の向きになる」という理解が必要だった。
+
+
+
+
+解説(概念): `List<? extends T>`は「実際の型はTかそれ以下」(実際の型 ≦ T)という関係なので、実際の型が分かっている状態でTを逆算すると`T ≧ 実際の型`になる。`List<? super T>`は「実際の型はTかそれ以上」(実際の型 ≧ T)なので、逆算すると`T ≦ 実際の型`になる。13行目は`src=Integer`→T≧Integer、`dest=Number`→T≦Number で`T=Integer`が両立するためOK。19行目は`src=Number`(numSrc)→T≧Number、`dest=Integer`(dest3)→T≦Integer で、NumberはIntegerより上位のため両方を満たす`T`が存在せずコンパイルエラーになる。
+
+
+
+
+正解: D
+
+
+
+
+あなたの回答: B
+
+<a id="問題10-3"></a>
+## 問題10-3
+
+```java
+1  import java.util.ArrayList;
+2  import java.util.List;
+3
+4  public class Main {
+5      static <T> void copy(List<? super T> dest, List<? extends T> src) {
+6          for (T t : src) dest.add(t);
+7      }
+8      public static void main(String[] args) {
+9          List<Integer> iList = new ArrayList<>();
+10         iList.add(1);
+11         List<Double> dList = new ArrayList<>();
+12         dList.add(2.0);
+13         List<Number> nList = new ArrayList<>();
+14         List<Object> oList = new ArrayList<>();
+15
+16         copy(nList, iList);
+17         copy(oList, dList);
+18         copy(iList, dList);
+19         copy(nList, dList);
+20     }
+21 }
+```
+
+このコードをコンパイルするとどうなるか。
+
+A. すべて問題なくコンパイルできる
+B. 17行目のみコンパイルエラーになる
+C. 18行目のみコンパイルエラーになる
+D. 18行目と19行目でコンパイルエラーになる
+
+**実施記録**
+
+
+
+
+迷ったポイント: なし(問題10-2の不等式の考え方を踏まえて一発正解)。
+
+
+
+
+解説(概念): 16行目(`src=Integer`→T≧Integer, `dest=Number`→T≦Number)は`T=Integer`で両立しOK。17行目(`src=Double`→T≧Double, `dest=Object`→T≦Object)は`T=Double`で両立しOK。18行目(`src=Double`→T≧Double, `dest=Integer`→T≦Integer)は`IntegerとDouble`が互いに親子関係のない「兄弟」型のため両立する`T`が存在せずエラー。19行目(`src=Double`→T≧Double, `dest=Number`→T≦Number)は`Double`が`Number`の子なので`T=Double`で両立しOK。エラーになるのは18行目のみ。
+
+
+
+
+正解: C
+
+
+
+
+あなたの回答: C

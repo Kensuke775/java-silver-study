@@ -6,7 +6,7 @@ public class Main {
         Number[] nArr = {0, 1, 2};
         Integer[] iArr = {0, 1, 2};
         nArr = iArr;
-     // nArr[0] = 3.0; // ArrayStoreException‚ªƒXƒ[‚³‚ê‚é
+     // nArr[0] = 3.0; // ArrayStoreExceptionï¿½ï¿½ï¿½Xï¿½ï¿½ï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½
         List<Number> nList = new ArrayList<>(); nList.add(1);
         List<Integer> iList = new ArrayList<>(); iList.add(1);
      // nList = iList;
