@@ -321,6 +321,45 @@ sb1.toString().equals(sb2.toString());  // true(Stringに変換してから比�
 
 `StringBuilder`の中身を比較したい場合は、`toString()`で`String`に変換してから`equals()`を使う必要がある(javac/javaで検証済み)。
 
+**実装例: この`Point`に`hashCode()`を追加するとしたら**
+
+`equals()`が比較に使っているフィールド(`x`, `y`)を、そのまま`hashCode()`の計算にも使うのが基本パターン。一番簡単なのは`Objects.hash(...)`に可変長引数でフィールドを渡す書き方。
+
+```java
+import java.util.Objects;
+
+class Point {
+    int x, y;
+    Point(int x, int y) { this.x = x; this.y = y; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Point)) return false;
+        Point p = (Point) o;
+        return this.x == p.x && this.y == p.y;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y);   // equals()と同じフィールド(x, y)を使う
+    }
+}
+```
+
+これを追加すると`set.size()`は`1`(正しく重複排除)になる(javacで検証済み)。自分で計算式を書く場合の定番パターンも参考までに:
+
+```java
+@Override
+public int hashCode() {
+    int result = 17;
+    result = 31 * result + x;
+    result = 31 * result + y;
+    return result;
+}
+```
+
+どちらでも良いが、実務では`Objects.hash(...)`一択で書かれることが多い。大事なのは計算方法そのものではなく、「`equals()`が見ているフィールドと`hashCode()`が見ているフィールドを一致させる」という点。
+
 ## 問題13-2
 
 ```java
@@ -460,6 +499,20 @@ D. `[1, 2, 3]` → `1` → `2` → `[3]`
 
 
 あなたの回答: A
+
+**まとめ: `Deque`のメソッドは「例外系」と「安全系」の2グループにきれいに分類できる**
+
+`push`/`pop`は名前だけ見ると独立した特別な操作に見えるが、実体は`addFirst`/`removeFirst`の別名でしかないため、他のメソッドと同じ2グループのどちらかに機械的に分類できる。
+
+```
+例外系(失敗すると例外をスロー): add, addFirst, addLast, remove, removeFirst, removeLast, element, getFirst, getLast, push, pop
+安全系(失敗するとnull/falseを返す): offer, offerFirst, offerLast, poll, pollFirst, pollLast, peek, peekFirst, peekLast
+```
+
+- `push()`≒`addFirst()`なので「例外系」。容量制限のあるDeque実装で満杯のときに追加しようとすると`IllegalStateException`(`ArrayDeque`はサイズ無制限なので実際にはまず起きない)。
+- `pop()`≒`removeFirst()`なので「例外系」。空の状態で呼ぶと`NoSuchElementException`(問題15-2で確認済み)。
+
+`poll()`(Queue由来、安全系)と`pop()`(Stack由来、例外系)は、どちらも「先頭から取り出す」という同じ方向の操作だが、失敗したときの挙動が違うグループに属している、という点を混同しないよう注意。
 
 <a id="問題15-1"></a>
 ## 問題15-1

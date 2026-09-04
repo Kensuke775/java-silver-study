@@ -1,0 +1,15 @@
+.DS_Store
+*.class
+
+# textbook PDFs (copyright)
+*.pdf
+
+# hands-on scratch/experiment files (not meant for git; see feedback_hands_on_editing)
+JavaGold/_play/
+JavaSilver/sample/
+
+# personal daily memos (repo is public)
+memos/
+
+# local Claude Code project settings
+.claude/
