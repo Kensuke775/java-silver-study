@@ -6,6 +6,8 @@
 - [問題18-2](#問題18-2)
 - [問題19-1](#問題19-1)
 - [問題19-2](#問題19-2)
+- [問題19-3](#問題19-3)
+- [問題19-4](#問題19-4)
 
 <a id="問題18-1"></a>
 ## 問題18-1
@@ -237,3 +239,105 @@ D. コンパイルエラーになる
 
 
 あなたの回答: D
+
+<a id="問題19-3"></a>
+## 問題19-3
+
+```java
+1  import java.util.Comparator;
+2  import java.util.Set;
+3  import java.util.TreeSet;
+4
+5  class SortByLength implements Comparator<String> {
+6      @Override
+7      public int compare(String o1, String o2) {
+8          return o1.length() - o2.length();
+9      }
+10 }
+11
+12 public class Main {
+13     public static void main(String[] args) {
+14         Set<String> set = new TreeSet<>(
+15                 Comparator.nullsLast(new SortByLength()));
+16         set.add("Alexander");
+17         set.add("Bob");
+18         set.add(null);
+19         set.add("Casey");
+20         System.out.println(set);
+21     }
+22 }
+```
+
+このコードを実行するとどうなるか。
+
+A. `[null, Bob, Casey, Alexander]`
+B. `[Bob, Casey, Alexander, null]`
+C. 18行目で`NullPointerException`がスローされる
+D. コンパイルエラーになる
+
+**実施記録**
+
+
+
+
+迷ったポイント: なし(一発正解)。
+
+
+
+
+解説(概念): `Comparator.nullsLast(比較用Comparator)`は「`null`を他のどの要素よりも大きいとみなす」というルールを既存の`Comparator`(`SortByLength`)に上乗せする。文字数の少ない順(`Bob(3), Casey(5), Alexander(9)`)に並び、`null`は一番大きい扱いなので最後尾に来る → `[Bob, Casey, Alexander, null]`。`nullsFirst()`との違いは`null`を「最小」とみなすか「最大」とみなすかだけで、仕組みは同じ。
+
+
+
+
+正解: B
+
+
+
+
+あなたの回答: B
+
+<a id="問題19-4"></a>
+## 問題19-4
+
+```java
+1  import java.util.Arrays;
+2  import java.util.Comparator;
+3
+4  public class Main {
+5      public static void main(String[] args) {
+6          String[] arr = {"Duke", "bob", "Alexander", "casey"};
+7          Arrays.sort(arr, Comparator.reverseOrder());
+8          System.out.println(Arrays.toString(arr));
+9      }
+10 }
+```
+
+このコードを実行するとどうなるか。
+
+A. `[Duke, casey, bob, Alexander]`
+B. `[Alexander, Duke, bob, casey]`
+C. `[casey, bob, Duke, Alexander]`
+D. `[Alexander, bob, casey, Duke]`
+
+**実施記録**
+
+
+
+
+迷ったポイント: `String`の自然順序(辞書順)における大文字・小文字の扱いを誤解していた(大文字小文字を区別せず単純なアルファベット順になると思い込んでいた)。実際には文字コード(Unicode)順で比較されるため、**すべての大文字(A-Z)はすべての小文字(a-z)より小さい**(`'A'=65`〜`'Z'=90` < `'a'=97`〜`'z'=122`)。
+
+
+
+
+解説(概念): まず自然順序(昇順)で並べると、大文字始まりの`Alexander`, `Duke`が小文字始まりの`bob`, `casey`より必ず先に来る → `[Alexander, Duke, bob, casey]`。`Comparator.reverseOrder()`はこの自然順序をそのまま逆転させるので、`[casey, bob, Duke, Alexander]`になる。単純に「アルファベット順を逆にすればいい」と考えると`D`のような大文字/小文字混在の誤答を作りやすいが、まず自然順序(大文字が先)を正確に出してから逆転させる、という2段階で考える必要がある。
+
+
+
+
+正解: C
+
+
+
+
+あなたの回答: A

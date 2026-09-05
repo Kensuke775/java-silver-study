@@ -5,8 +5,10 @@
 *.pdf
 
 # hands-on scratch/experiment files (not meant for git; see feedback_hands_on_editing)
+_play/
 JavaGold/_play/
 JavaSilver/sample/
+_spacer
 
 # personal daily memos (repo is public)
 memos/
